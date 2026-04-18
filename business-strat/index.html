@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PLANET AI — als ein Startup</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700;900&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f172a;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent: #e91e8a;
+      --accent2: #06b6d4;
+      --accent3: #8b5cf6;
+      --glow-pink: rgba(233,30,138,0.4);
+      --glow-cyan: rgba(6,182,212,0.4);
+      --glow-purple: rgba(139,92,246,0.3);
+      --font-heading: 'Inter', system-ui, sans-serif;
+      --slide-transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    html.fancy {
+      --bg: #020010;
+      --text: #d0e0ff;
+      --text-muted: #5a7aaa;
+      --font-heading: 'Orbitron', sans-serif;
+      --slide-transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; transition: background 0.6s ease, color 0.6s ease; }
+
+    #starfield, .grid-floor, .orb, .scanlines { opacity: 0; pointer-events: none; transition: opacity 0.8s ease; }
+    html.fancy #starfield, html.fancy .grid-floor, html.fancy .orb, html.fancy .scanlines { opacity: 1; }
+
+    #starfield { position: fixed; inset: 0; z-index: 0; }
+
+    .grid-floor {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 45vh; z-index: 1;
+      background:
+        linear-gradient(to top, rgba(6,182,212,0.06) 0%, transparent 100%),
+        repeating-linear-gradient(90deg, rgba(6,182,212,0.08) 0px, transparent 1px, transparent 80px),
+        repeating-linear-gradient(0deg, rgba(6,182,212,0.08) 0px, transparent 1px, transparent 80px);
+      transform: perspective(500px) rotateX(55deg); transform-origin: bottom center;
+      animation: gridScroll 8s linear infinite;
+    }
+    @keyframes gridScroll { 0% { background-position-y: 0; } 100% { background-position-y: 80px; } }
+
+    .orb { position: fixed; border-radius: 50%; filter: blur(80px); z-index: 1; pointer-events: none; animation: orbFloat 12s ease-in-out infinite alternate; }
+    .orb-1 { width: 400px; height: 400px; top: -100px; left: -100px; background: var(--glow-pink); opacity: 0.3; }
+    .orb-2 { width: 500px; height: 500px; bottom: -150px; right: -150px; background: var(--glow-purple); opacity: 0.25; animation-delay: -4s; }
+    .orb-3 { width: 300px; height: 300px; top: 50%; left: 50%; transform: translate(-50%,-50%); background: var(--glow-cyan); opacity: 0.15; animation-delay: -8s; }
+    @keyframes orbFloat { 0% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px,-20px) scale(1.1); } 100% { transform: translate(-20px,30px) scale(0.95); } }
+    .orb-3 { animation-name: orbFloat3; }
+    @keyframes orbFloat3 { 0% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-45%,-55%) scale(1.15); } 100% { transform: translate(-55%,-45%) scale(0.9); } }
+
+    .scanlines {
+      position: fixed; inset: 0; z-index: 2; pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
+    }
+
+    .deck { position: relative; width: 100vw; height: 100vh; z-index: 10; transition: perspective 0.6s ease; }
+    html.fancy .deck { perspective: 1200px; }
+
+    .slide {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      padding: 60px 80px;
+      opacity: 0; pointer-events: none;
+      transition: var(--slide-transition);
+      transform: translateX(40px);
+    }
+    .slide.active { opacity: 1; pointer-events: auto; transform: translateX(0); }
+    .slide.prev  { opacity: 0; pointer-events: none; transform: translateX(-40px); }
+
+    html.fancy .slide       { transform: translateZ(-200px) rotateY(8deg); }
+    html.fancy .slide.active { transform: translateZ(0) rotateY(0); }
+    html.fancy .slide.prev  { transform: translateZ(-200px) rotateY(-8deg); }
+
+    h1 { font-family: var(--font-heading); font-size: 3.2em; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; text-align: center; transition: font-family 0.3s, font-size 0.3s, letter-spacing 0.3s; }
+    html.fancy h1 { font-size: 3.6em; letter-spacing: 0.05em; }
+    h1 span {
+      display: block;
+      background: linear-gradient(135deg, #e91e8a, #8b5cf6, #06b6d4, #67e8f9);
+      background-size: 300% 300%;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    html.fancy h1 span { animation: gradientShift 6s ease-in-out infinite; }
+    @keyframes gradientShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+    h2 { font-family: var(--font-heading); font-size: 2em; font-weight: 700; color: #f8fafc; margin-bottom: 0.15em; text-align: center; transition: font-family 0.3s, text-shadow 0.3s; }
+    html.fancy h2 { font-size: 1.8em; text-shadow: 0 0 30px var(--glow-cyan), 0 0 60px rgba(6,182,212,0.2); }
+
+    h3 { font-size: 1.1em; font-weight: 400; color: var(--accent2); margin-bottom: 1.2em; text-align: center; transition: letter-spacing 0.3s, text-transform 0.3s; }
+    html.fancy h3 { font-size: 1em; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase; }
+
+    .subtitle { color: var(--text-muted); font-size: 1.1em; margin-top: 0.8em; text-align: center; transition: font-family 0.3s, letter-spacing 0.3s; }
+    html.fancy .subtitle { font-family: 'Orbitron', sans-serif; font-size: 1em; letter-spacing: 0.15em; }
+
+    ul, ol { list-style: none; max-width: 820px; width: 100%; }
+    ul li, ol li { padding: 0.55em 0; font-size: 0.85em; line-height: 1.55; border-bottom: 1px solid rgba(148,163,184,0.1); transition: border-color 0.3s; }
+    html.fancy ul li, html.fancy ol li { border-bottom-color: rgba(6,182,212,0.1); }
+    ul li:last-child, ol li:last-child { border-bottom: none; }
+    ul li strong, ol li strong { color: var(--accent); transition: text-shadow 0.3s; }
+    html.fancy ul li strong, html.fancy ol li strong { text-shadow: 0 0 12px var(--glow-pink); }
+
+    blockquote {
+      border-left: 3px solid var(--accent); background: rgba(233,30,138,0.08);
+      padding: 0.6em 1.2em; margin-top: 1.2em; max-width: 820px; width: 100%;
+      font-size: 0.8em; color: #cbd5e1; border-radius: 0 6px 6px 0;
+      transition: border-color 0.3s, background 0.3s, box-shadow 0.3s, backdrop-filter 0.3s;
+    }
+    html.fancy blockquote {
+      border-left-color: var(--accent2); background: rgba(6,182,212,0.06);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px rgba(6,182,212,0.08), inset 0 0 20px rgba(6,182,212,0.03);
+      color: #93c5e8; font-size: 0.78em; border-radius: 0 8px 8px 0;
+    }
+
+    table {
+      border-collapse: collapse; max-width: 1000px; width: 100%; font-size: 0.78em;
+      background: rgba(15,23,42,0.6); border-radius: 8px; overflow: hidden;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    html.fancy table {
+      background: rgba(2,0,16,0.7);
+      box-shadow: 0 0 20px rgba(6,182,212,0.08), inset 0 0 30px rgba(6,182,212,0.03);
+      backdrop-filter: blur(10px);
+    }
+    th {
+      background: rgba(233,30,138,0.15); color: var(--accent); font-weight: 700;
+      padding: 0.6em 0.8em; text-align: left; border-bottom: 2px solid rgba(233,30,138,0.3);
+      transition: background 0.3s, color 0.3s, text-shadow 0.3s;
+    }
+    html.fancy th {
+      background: rgba(6,182,212,0.1); color: var(--accent2);
+      border-bottom-color: rgba(6,182,212,0.3);
+      text-shadow: 0 0 10px var(--glow-cyan);
+    }
+    td {
+      padding: 0.5em 0.8em; border-bottom: 1px solid rgba(148,163,184,0.08);
+      color: var(--text); transition: border-color 0.3s;
+    }
+    html.fancy td { border-bottom-color: rgba(6,182,212,0.08); }
+    tr:last-child td { border-bottom: none; }
+    td strong { color: var(--accent); }
+    html.fancy td strong { text-shadow: 0 0 8px var(--glow-pink); }
+    td em { color: var(--accent2); font-style: italic; }
+    .highlight-row { background: rgba(233,30,138,0.08); }
+    html.fancy .highlight-row { background: rgba(6,182,212,0.06); }
+
+    /* Stack table for Knowledge Worker */
+    .stack-table { max-width: 800px; }
+    .stack-table td { text-align: center; font-weight: 600; }
+    .stack-header td { background: rgba(51,51,51,0.8); font-size: 1.1em; }
+    .stack-vision td { background: rgba(46,74,122,0.6); }
+    .stack-edge td { background: rgba(233,30,140,0.35); }
+    .stack-fm td { background: rgba(27,42,74,0.6); }
+    .stack-ida td { background: rgba(0,188,212,0.3); }
+    html.fancy .stack-header td { background: rgba(51,51,51,0.6); }
+    html.fancy .stack-edge td { background: rgba(233,30,140,0.25); }
+
+    .split { display: flex; gap: 2em; width: 100%; max-width: 1100px; align-items: center; flex: 1; min-height: 0; }
+    .split .col { flex: 1; min-width: 0; }
+    .split img { max-width: 100%; height: auto; border-radius: 8px; }
+
+    a { color: var(--accent2); text-decoration: none; border-bottom: 1px solid rgba(6,182,212,0.3); transition: color 0.3s, border-color 0.3s; }
+    a:hover { color: #67e8f9; border-bottom-color: #67e8f9; }
+
+    .slide-num { position: fixed; bottom: 20px; right: 32px; font-size: 0.75em; color: #475569; z-index: 100; font-variant-numeric: tabular-nums; transition: font-family 0.3s; }
+    html.fancy .slide-num { font-family: 'Orbitron', sans-serif; font-size: 0.7em; color: #2a4a6a; letter-spacing: 0.1em; }
+
+    .progress { position: fixed; top: 0; left: 0; height: 3px; z-index: 100; background: linear-gradient(90deg, #e91e8a, #8b5cf6, #06b6d4); transition: width 0.4s ease, box-shadow 0.3s; }
+    html.fancy .progress { height: 2px; box-shadow: 0 0 12px var(--glow-cyan), 0 0 30px var(--glow-pink); }
+
+    .hint { position: fixed; bottom: 20px; left: 32px; font-size: 0.65em; color: #334155; z-index: 100; transition: font-family 0.3s; }
+    html.fancy .hint { font-family: 'Orbitron', sans-serif; font-size: 0.55em; color: #1a3a5a; letter-spacing: 0.1em; }
+
+    .compact h2 { font-size: 1.6em; }
+    .compact h3 { margin-bottom: 0.6em; }
+    .compact table { font-size: 0.7em; }
+    .compact ul li { font-size: 0.75em; padding: 0.35em 0; }
+    .compact blockquote { font-size: 0.7em; margin-top: 0.8em; }
+    html.fancy .compact h2 { font-size: 1.5em; }
+    html.fancy .compact table { font-size: 0.68em; }
+
+    .theme-toggle {
+      position: fixed; top: 16px; right: 24px; z-index: 200;
+      background: rgba(100,116,139,0.15); border: 1px solid rgba(100,116,139,0.2);
+      color: #64748b; font-family: 'Inter', sans-serif; font-size: 0.65em;
+      padding: 6px 14px; border-radius: 20px; cursor: pointer;
+      transition: all 0.3s ease; backdrop-filter: blur(8px); letter-spacing: 0.05em;
+    }
+    .theme-toggle:hover { background: rgba(100,116,139,0.25); color: #94a3b8; }
+    html.fancy .theme-toggle { font-family: 'Orbitron', sans-serif; border-color: rgba(6,182,212,0.2); color: #2a4a6a; }
+    html.fancy .theme-toggle:hover { color: #06b6d4; border-color: rgba(6,182,212,0.4); box-shadow: 0 0 15px rgba(6,182,212,0.1); }
+
+    html.fancy .slide.active h1, html.fancy .slide.active h2 { animation: fadeInUp 0.6s ease both; }
+    html.fancy .slide.active h3 { animation: fadeInUp 0.6s 0.1s ease both; }
+    html.fancy .slide.active table { animation: fadeInUp 0.6s 0.15s ease both; }
+    html.fancy .slide.active ul, html.fancy .slide.active ol { animation: fadeInUp 0.6s 0.25s ease both; }
+    html.fancy .slide.active blockquote { animation: fadeInUp 0.6s 0.35s ease both; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+<div class="grid-floor"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="scanlines"></div>
+
+<div class="progress" id="progress"></div>
+<div class="slide-num" id="slideNum"></div>
+<div class="hint" id="hint">← →  Pfeiltasten · T Theme · F Fullscreen</div>
+<button class="theme-toggle" id="themeToggle">HOLODECK</button>
+
+<div class="deck">
+
+  <!-- SLIDE 1: Title -->
+  <div class="slide">
+    <h1><span>PLANET AI</span></h1>
+    <h3>als ein Startup</h3>
+    <p class="subtitle">Slide Deck · Version 1.1 · April 2026</p>
+  </div>
+
+  <!-- SLIDE 2: Unser Edge -->
+  <div class="slide">
+    <h2>Unser Edge</h2>
+    <div class="split">
+      <div class="col">
+        <img src="DocVQA/value_chain.png" alt="Value Chain" />
+      </div>
+      <div class="col">
+        <ul>
+          <li><strong>DocVQA 2026 (ICDAR)</strong> — härtester Benchmark</li>
+          <li>Frontier allein: <strong>~40%</strong></li>
+          <li>+ IDA: <strong>+7%</strong></li>
+          <li>+ DCA: <strong>+13%</strong> → <strong>60%</strong></li>
+        </ul>
+        <blockquote>
+          <strong>Nachhaltig:</strong> Bessere FMs heben Baseline — IDA/DCA addieren <em>on top</em>.<br/>
+          Modellfortschritt = unser Fortschritt
+        </blockquote>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: AI Knowledge Worker Stack -->
+  <div class="slide">
+    <h2>Der AI Knowledge Worker</h2>
+    <table class="stack-table">
+      <tr class="stack-header"><td colspan="3"><strong>= AI Knowledge Worker</strong></td></tr>
+      <tr class="stack-vision"><td><strong>AI University</strong></td><td>Lernen + Anpassen + Individualisieren</td><td><strong>Vision</strong> — Alleinstellung von morgen</td></tr>
+      <tr class="stack-edge highlight-row"><td><strong>DCA</strong></td><td>Denken + Entscheiden + Konvergieren</td><td><strong>Edge</strong> — unser Vorsprung</td></tr>
+      <tr class="stack-fm"><td><strong>Foundation Models</strong></td><td>Fähigkeiten + Wissen + Weltmodell</td><td>Commodity — extern, austauschbar</td></tr>
+      <tr class="stack-ida"><td><strong>IDA</strong></td><td>Lesen + Klassifizieren + Extrahieren</td><td>Commodity — Grundlage</td></tr>
+    </table>
+    <blockquote>Vier Schichten, ein Produkt: der <strong>AI Knowledge Worker</strong>.</blockquote>
+  </div>
+
+  <!-- SLIDE 4: Chatbot vs Knowledge Worker -->
+  <div class="slide compact">
+    <h2>Chatbot vs. Knowledge Worker</h2>
+    <h3>Die meisten verwechseln beides. Der Unterschied ist fundamental.</h3>
+    <table>
+      <tr><th></th><th>Chatbot</th><th>Knowledge Worker</th></tr>
+      <tr><td><strong>Modus</strong></td><td>Fragen beantworten</td><td>Aufgaben lösen</td></tr>
+      <tr><td><strong>Input</strong></td><td>Eine Frage</td><td>Ein Auftrag</td></tr>
+      <tr><td><strong>Output</strong></td><td>Eine Antwort</td><td>Ein Ergebnis</td></tr>
+      <tr><td><strong>Beispiel</strong></td><td><em>"Was steht in §3?"</em></td><td><em>"Prüfe den Vertrag auf Risiken und erstelle eine Redline"</em></td></tr>
+      <tr><td><strong>Wertschöpfung</strong></td><td>Information</td><td>Entscheidung + Aktion</td></tr>
+      <tr><td><strong>Ersetzt</strong></td><td>Google / FAQ</td><td>Sachbearbeiter / Analyst</td></tr>
+      <tr><td><strong>Pricing</strong></td><td>Seat / Abo</td><td>per Case / per Ergebnis</td></tr>
+    </table>
+    <blockquote>
+      <strong>Chatbot</strong> = Suchmaschine mit natürlicher Sprache. Nützlich, aber kein Geschäftsmodell.<br/>
+      <strong>Knowledge Worker</strong> = denkt, entscheidet, liefert ab. Messbar, skalierbar, monetarisierbar.<br/><br/>
+      Wer nur einen Chatbot baut, konkurriert mit ChatGPT. Wer einen Knowledge Worker baut, ersetzt Prozesskosten.
+    </blockquote>
+  </div>
+
+  <!-- SLIDE 5: Nicht Technologie sondern Wertschöpfung -->
+  <div class="slide">
+    <h2>Nicht Technologie sondern Wertschöpfung</h2>
+    <table>
+      <tr><th></th><th>A: Technologie verkaufen</th><th>B: Wertschöpfung verkaufen</th></tr>
+      <tr><td><strong>Produkt</strong></td><td>Software-Zugang</td><td>Arbeitsergebnis</td></tr>
+      <tr><td><strong>Pricing</strong></td><td>Seat / Lizenz</td><td>per Case / per Entscheidung</td></tr>
+      <tr><td><strong>Vertrieb</strong></td><td><strong>Push</strong> — Enterprise-Team, Workshops</td><td><strong>Pull</strong> — Output überzeugt, Kunde kommt</td></tr>
+      <tr><td><strong>Akquisekosten</strong></td><td>Hoch</td><td>Niedrig</td></tr>
+      <tr><td><strong>Skalierung</strong></td><td>Linear (mehr Sales)</td><td>Exponentiell (mehr Qualität)</td></tr>
+      <tr><td><strong>Kunde kauft</strong></td><td><em>Potenzial</em></td><td><em>Ergebnis</em></td></tr>
+    </table>
+  </div>
+
+  <!-- SLIDE 6: Nicht Lizenzen sondern Ergebnisse -->
+  <div class="slide compact">
+    <h2>Nicht Lizenzen sondern Ergebnisse</h2>
+    <table>
+      <tr><th>Mechanismus</th><th>Unser Beispiel</th><th>Wer macht das heute</th></tr>
+      <tr><td><strong>Per Case</strong></td><td>Vertragsprüfung, Claims, Due Diligence</td><td>Kira (Legal AI) — pro Vertrag</td></tr>
+      <tr><td><strong>Per Tender</strong></td><td>Ausschreibungsanalyse, Anforderungsmatching</td><td>Spend Matters — pro Ausschreibung</td></tr>
+      <tr><td><strong>Per Einsparung</strong></td><td>Rechnungsfehler, Förderpotenzial</td><td>Stripe Radar — % vom verhinderten Betrug</td></tr>
+      <tr><td><strong>Per Entscheidung</strong></td><td>Risikobewertung, Lieferantenauswahl</td><td>Palantir AIP — pro Entscheidungs-Workflow</td></tr>
+      <tr><td><strong>Usage-based API</strong></td><td>Pro Request für Entwickler</td><td>Claude API / Claude Code — pro Token</td></tr>
+    </table>
+    <blockquote>Revenue skaliert mit Output, nicht mit Nutzerzahl — <strong>ideal für IONOS oder StackIT</strong></blockquote>
+  </div>
+
+  <!-- SLIDE 7: Der Output ist der Vertrieb -->
+  <div class="slide compact">
+    <h2>Der Output ist der Vertrieb</h2>
+    <table>
+      <tr><th>Kanal</th><th>Mechanismus</th><th>Vorbild</th></tr>
+      <tr><td><strong>Self-serve SaaS</strong></td><td>Upload → Ergebnis → Freemium → Conversion</td><td>ChatGPT, DeepL</td></tr>
+      <tr><td><strong>Public Benchmarks</strong></td><td>Qualitätsbeweis erzeugt Inbound</td><td>DocVQA, SWE-bench, MMLU</td></tr>
+      <tr><td><strong>API / Developer Pull</strong></td><td>SDKs, Playground → Einbau in Drittsysteme</td><td>Google Maps API, Stripe</td></tr>
+      <tr><td><strong>Bottom-up</strong></td><td>Einzelnutzer → Team → Organisation</td><td>Dropbox, Slack</td></tr>
+      <tr><td><strong>OEM / White-Label</strong></td><td>Einbettung in DMS, ERP, Legal-Tech</td><td>Intel Inside, Dolby</td></tr>
+      <tr><td><strong>Cloud / Hyperscaler</strong></td><td>Marketplace-Distribution, EU-souverän</td><td>IONOS, StackIT, Azure</td></tr>
+    </table>
+    <blockquote>Kein Workshop. Kein POC. Upload, Ergebnis, Entscheidung.</blockquote>
+  </div>
+
+  <!-- SLIDE 8: Vertikale Fokussierung -->
+  <div class="slide compact">
+    <h2>Vertikale Fokussierung</h2>
+    <h3>Horizontal verliert. Vertikal gewinnt.</h3>
+    <table>
+      <tr><th>Vertical</th><th>Kernprodukt</th><th>Warum</th></tr>
+      <tr><td><strong>Insurance</strong></td><td>Claims, Fraud, Policenprüfung</td><td>Klare Prozesse, messbare Einsparung</td></tr>
+      <tr><td><strong>Legal / M&amp;A</strong></td><td>Contract Intelligence, Due Diligence</td><td>Höchste Zahlungsbereitschaft</td></tr>
+      <tr><td><strong>Healthcare</strong></td><td>Befunde, Arztbriefe, Medikation</td><td>Hohe Regulierung, Digitalisierungsdruck</td></tr>
+      <tr><td><strong>Public Sector</strong></td><td>Anträge, Compliance</td><td>Regulatorischer Druck, Volumen</td></tr>
+      <tr><td><strong>Regulatory</strong></td><td>Policy Enforcement, Audit Trails</td><td>Wachsender Markt, hohe Marge</td></tr>
+    </table>
+    <ul>
+      <li><strong>Wedge-Produkte</strong> (Einstieg):</li>
+      <li>1. Contract Risk Analyzer</li>
+      <li>2. Tender Intelligence</li>
+      <li>3. Compliance Checker</li>
+    </ul>
+  </div>
+
+  <!-- SLIDE 9: Unsere Position -->
+  <div class="slide">
+    <h2>Unsere Position</h2>
+    <table>
+      <tr><th>Markt</th><th>Wir</th></tr>
+      <tr><td>Dokumente lesen</td><td>Dokumente <strong>verstehen</strong> und Entscheidungen ableiten</td></tr>
+      <tr><td>Chat über Dokumente</td><td><strong>Knowledge Worker</strong> — denkt, lernt, handelt</td></tr>
+      <tr><td>US Cloud</td><td><strong>EU Cloud</strong> — IONOS, StackIT, DSGVO by Design</td></tr>
+      <tr><td>Individuelle Lösung</td><td><strong>Skalierbares Produkt</strong> — eine Plattform, beliebige Verticals</td></tr>
+    </table>
+  </div>
+
+  <!-- SLIDE 10: Infrastruktur existiert -->
+  <div class="slide">
+    <h2>Infrastruktur existiert. Intelligenz fehlt.</h2>
+    <table>
+      <tr><th>Existiert</th><th>Fehlt</th></tr>
+      <tr><td>GPUs, Cloud, Rechenzentren</td><td>Intelligenz, die darauf läuft</td></tr>
+      <tr><td>Foundation Models</td><td>Produkte, die Ergebnisse liefern</td></tr>
+      <tr><td>EU-Infrastruktur</td><td>EU-souveräne AI-Produkte</td></tr>
+    </table>
+    <blockquote>Partner (IONOS, StackIT) sind Beschleuniger — nicht Voraussetzung.</blockquote>
+  </div>
+
+  <!-- SLIDE 11: Autonomous Backoffice -->
+  <div class="slide compact">
+    <h2>Autonomous Backoffice</h2>
+    <h3>AI übernimmt komplette Prozesse — nicht assistieren, sondern erledigen</h3>
+    <table>
+      <tr><th>Vertical</th><th>Prozess</th><th>Was der Knowledge Worker tut</th></tr>
+      <tr><td><strong>Insurance</strong></td><td>Claims Processing</td><td>Schaden bewerten, Fraud erkennen, Auszahlung entscheiden</td></tr>
+      <tr><td><strong>Banking</strong></td><td>KYC / AML</td><td>Identität prüfen, Risiko bewerten, Freigabe erteilen</td></tr>
+      <tr><td><strong>Public Sector</strong></td><td>Antragssysteme</td><td>Antrag prüfen, Vollständigkeit sichern, Bescheid vorbereiten</td></tr>
+      <tr><td><strong>Legal</strong></td><td>Vertragsanalyse</td><td>Risiken identifizieren, Klauseln bewerten, Redline erstellen</td></tr>
+    </table>
+    <blockquote><strong>Schnellster Weg zu Umsatz:</strong> Ergebnis statt Tool, messbarer ROI, Pricing pro Case.</blockquote>
+  </div>
+
+  <!-- SLIDE 12: Enterprise Memory -->
+  <div class="slide">
+    <h2>Enterprise Memory</h2>
+    <h3>Das Gedächtnis des Unternehmens — alle Dokumente werden zu strukturierter Realität</h3>
+    <table>
+      <tr><th>Was rein geht</th><th>Was entsteht</th></tr>
+      <tr><td>Verträge, Rechnungen, Korrespondenz</td><td>Beziehungsgraphen, Verpflichtungen, Fristen</td></tr>
+      <tr><td>Historische Dokumente</td><td>Kontext und Entwicklung über Zeit</td></tr>
+      <tr><td>Neue Dokumente</td><td>Automatische Einordnung und Verknüpfung</td></tr>
+    </table>
+    <blockquote>Wert: Grundlage für alle Agenten. Baut sich über Zeit auf. <strong>Nicht kopierbar.</strong></blockquote>
+  </div>
+
+  <!-- SLIDE 13: Micro-Products -->
+  <div class="slide compact">
+    <h2>Micro-Products</h2>
+    <h3>Nicht eine Plattform für alle — sondern scharf definierte Produkte für konkrete Probleme</h3>
+    <table>
+      <tr><th>Produkt</th><th>Job-to-be-done</th><th>Vertical</th></tr>
+      <tr><td><strong>Contract Risk Analyzer</strong></td><td>Vertrag hochladen → Risiken, Fristen, Pflichten</td><td>Legal</td></tr>
+      <tr><td><strong>Tender Intelligence</strong></td><td>Ausschreibung analysieren → Anforderungen, Lücken, Strategie</td><td>Public / Procurement</td></tr>
+      <tr><td><strong>Compliance Checker</strong></td><td>Dokumente gegen Regulatorik prüfen → Verstöße, Handlungsbedarf</td><td>Regulatory</td></tr>
+      <tr><td><strong>Invoice Auditor</strong></td><td>Rechnungen prüfen → Fehler, Überzahlungen, Duplikate</td><td>Finance</td></tr>
+      <tr><td><strong>Policy Checker</strong></td><td>Policen analysieren → Deckungslücken, Optimierungspotenzial</td><td>Insurance</td></tr>
+      <tr><td><strong>Claims Summarizer</strong></td><td>Schadenfall zusammenfassen → Entscheidungsvorlage</td><td>Insurance</td></tr>
+    </table>
+    <blockquote>Jedes Produkt: Landing Page, Self-serve, Freemium, Stripe Checkout.</blockquote>
+  </div>
+
+  <!-- SLIDE 14: Human-in-the-loop -->
+  <div class="slide">
+    <h2>Human-in-the-loop. Aber richtig.</h2>
+    <h3>Nicht Fallback. Sondern Lernmechanismus.</h3>
+    <table>
+      <tr><th></th><th>Klassisch</th><th>Unser Ansatz</th></tr>
+      <tr><td><strong>AI-Anteil</strong></td><td>60–70%</td><td><strong>95%</strong></td></tr>
+      <tr><td><strong>Mensch</strong></td><td>Korrigiert Fehler</td><td><strong>Trainiert das System</strong></td></tr>
+      <tr><td><strong>Effekt</strong></td><td>Gleichbleibend</td><td><strong>System wird besser</strong></td></tr>
+      <tr><td><strong>Skalierung</strong></td><td>Linear (mehr Menschen)</td><td><strong>Exponentiell (weniger Menschen)</strong></td></tr>
+    </table>
+    <blockquote>Jede menschliche Korrektur fließt zurück → AI University → besseres Modell.</blockquote>
+  </div>
+
+  <!-- SLIDE 15: Benchmark-as-Marketing -->
+  <div class="slide">
+    <h2>Benchmark-as-Marketing</h2>
+    <h3>Überlegene Qualität erzeugt Inbound — ohne Sales-Team</h3>
+    <table>
+      <tr><th>Maßnahme</th><th>Wirkung</th></tr>
+      <tr><td><strong>Public Leaderboard</strong></td><td>Sichtbarer Beweis: wir sind besser</td></tr>
+      <tr><td><strong>Live Demo</strong></td><td>Eigene Dokumente testen — sofort</td></tr>
+      <tr><td><strong>Offene Testsets</strong></td><td>Transparenz schafft Vertrauen</td></tr>
+      <tr><td><strong>"Compare against..."</strong></td><td>GPT, Claude, Gemini, Legacy OCR — wir gewinnen</td></tr>
+    </table>
+    <blockquote>Wer wirklich besser ist, kann sich öffentlich messen. Die meisten verstecken sich.</blockquote>
+  </div>
+
+  <!-- SLIDE 16: Personal Knowledge Worker -->
+  <div class="slide compact">
+    <h2>Personal Knowledge Worker</h2>
+    <h3>Nicht zuerst Unternehmen — sondern einzelne High-Value-Worker</h3>
+    <table>
+      <tr><th>Zielgruppe</th><th>Warum sie selbst zahlen</th></tr>
+      <tr><td><strong>Anwälte</strong></td><td>Vertragsprüfung in Minuten statt Stunden</td></tr>
+      <tr><td><strong>Steuerberater</strong></td><td>Dokumente sofort strukturiert</td></tr>
+      <tr><td><strong>M&amp;A-Berater</strong></td><td>Due Diligence beschleunigt</td></tr>
+      <tr><td><strong>Gutachter</strong></td><td>Befunde und Quellen automatisch verknüpft</td></tr>
+      <tr><td><strong>Consultants</strong></td><td>Reports aus Dokumentenbergen in Minuten</td></tr>
+    </table>
+    <blockquote><strong>Bottom-up:</strong> Einzelperson → Team → Organisation. Leichter als Top-down Enterprise.</blockquote>
+  </div>
+
+  <!-- SLIDE 17: Business Agent -->
+  <div class="slide compact">
+    <h2>Out of the Box: Der Business Agent</h2>
+    <h3>Ein Agent, der nicht nur analysiert — sondern direkt Geld verdient</h3>
+    <table>
+      <tr><th>Was der Agent tut</th><th>Monetärer Effekt</th></tr>
+      <tr><td>Überzahlte Rechnungen erkennen</td><td><strong>Direkte Rückforderung</strong></td></tr>
+      <tr><td>Vertragsrisiken vor Unterschrift finden</td><td><strong>Vermiedene Kosten</strong></td></tr>
+      <tr><td>Compliance-Verstöße entdecken</td><td><strong>Bußgelder verhindern</strong></td></tr>
+      <tr><td>Ungenutzte Förderansprüche identifizieren</td><td><strong>Fördermittel kassieren</strong></td></tr>
+      <tr><td>Versteckte Erlöschancen in Dokumentenbeständen</td><td><strong>Neuer Umsatz</strong></td></tr>
+    </table>
+    <blockquote>
+      "Spare 10 Stunden" ist weich. <strong>"Finde 200.000 € Fehler"</strong> ist hart.<br/><br/>
+      Pricing: Erfolgsbeteiligung. Kein Risiko für den Kunden.
+    </blockquote>
+  </div>
+
+  <!-- SLIDE 18: Der Weg dahin -->
+  <div class="slide">
+    <h2>Der Weg dahin</h2>
+    <table>
+      <tr><th>Phase</th><th>Zeitraum</th><th>Was sich ändert</th><th>Ziel</th></tr>
+      <tr><td><strong>1</strong></td><td>0–12 Mo</td><td>Erste Wedge-Produkte (Insurance, Legal), Self-serve</td><td>Umsatz + Referenzen</td></tr>
+      <tr><td><strong>2</strong></td><td>9–15 Mo</td><td>API öffnen, Cloud-Partner anbinden, Personal KW</td><td>Skalierung + Alleinstellung</td></tr>
+      <tr><td><strong>3</strong></td><td>15+ Mo</td><td>Plattform, OEM, Business Agent, Autonomous Backoffice</td><td>De-facto-Standard</td></tr>
+    </table>
+  </div>
+
+  <!-- SLIDE 19: Zusammenfassung -->
+  <div class="slide">
+    <h2>Zusammenfassung</h2>
+    <table>
+      <tr><th>Dimension</th><th>Alt</th><th>Neu</th></tr>
+      <tr><td><strong>Edge</strong></td><td>OCR / Extraktion</td><td>Document Reasoning (IDA + DCA + AI University)</td></tr>
+      <tr><td><strong>Produkt</strong></td><td>Software / Plattform</td><td>Entscheidungen + Aktionen</td></tr>
+      <tr><td><strong>Pricing</strong></td><td>Lizenz / Seat</td><td>per Value / per Case</td></tr>
+      <tr><td><strong>Sales</strong></td><td>Enterprise-Vertrieb</td><td>Self-serve, Output sells</td></tr>
+      <tr><td><strong>Alleinstellung</strong></td><td>Features</td><td>Memory + Flywheel + Domänenlernen</td></tr>
+      <tr><td><strong>Fokus</strong></td><td>Horizontal</td><td>Vertikal</td></tr>
+    </table>
+    <blockquote>
+      Dokumentenanalyse = Einstieg.<br/>
+      Knowledge Worker = Produkt.<br/>
+      Prozesse = Monetarisierung.<br/>
+      Memory = Alleinstellung.<br/>
+      Verticals = Go-to-Market.
+    </blockquote>
+  </div>
+
+</div>
+
+<script>
+// 3D Starfield
+(function() {
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  const NUM_STARS = 600;
+  const stars = [];
+
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  window.addEventListener('resize', resize);
+  resize();
+
+  for (let i = 0; i < NUM_STARS; i++) {
+    stars.push({
+      x: (Math.random() - 0.5) * W * 2,
+      y: (Math.random() - 0.5) * H * 2,
+      z: Math.random() * 1500 + 200,
+      color: ['#fff','#a5d8ff','#d0bfff','#fcc2d7','#99e9f2'][Math.floor(Math.random()*5)]
+    });
+  }
+
+  function draw() {
+    ctx.fillStyle = 'rgba(2, 0, 16, 0.25)';
+    ctx.fillRect(0, 0, W, H);
+    const cx = W / 2, cy = H / 2;
+    for (const s of stars) {
+      s.z -= 0.8;
+      if (s.z <= 1) { s.x = (Math.random()-0.5)*W*2; s.y = (Math.random()-0.5)*H*2; s.z = 1500; }
+      const sx = cx + s.x/s.z*400, sy = cy + s.y/s.z*400;
+      const r = Math.max(0.3, (1-s.z/1500)*2.2);
+      const a = Math.max(0.1, (1-s.z/1500));
+      const px = cx + s.x/(s.z+2)*400, py = cy + s.y/(s.z+2)*400;
+      ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(sx,sy);
+      ctx.strokeStyle = s.color; ctx.globalAlpha = a*0.4; ctx.lineWidth = r*0.6; ctx.stroke();
+      ctx.beginPath(); ctx.arc(sx,sy,r,0,Math.PI*2);
+      ctx.fillStyle = s.color; ctx.globalAlpha = a; ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// Theme Toggle
+var isFancy = false;
+function toggleTheme() {
+  isFancy = !isFancy;
+  document.documentElement.classList.toggle('fancy', isFancy);
+  document.getElementById('themeToggle').textContent = isFancy ? 'STANDARD' : 'HOLODECK';
+}
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+// Slide Navigation
+window.addEventListener('load', function() {
+  var slides = document.querySelectorAll('.slide');
+  var total = slides.length;
+  var current = 0;
+
+  function show(n) {
+    slides.forEach(function(s, i) {
+      s.classList.remove('active', 'prev');
+      if (i === n) s.classList.add('active');
+      else if (i < n) s.classList.add('prev');
+    });
+    document.getElementById('slideNum').textContent = (n+1) + ' / ' + total;
+    document.getElementById('progress').style.width = ((n+1)/total*100) + '%';
+  }
+
+  function next() { if (current < total-1) { current++; show(current); } }
+  function prev() { if (current > 0) { current--; show(current); } }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prev(); }
+    if (e.key === 'Home') { e.preventDefault(); current = 0; show(current); }
+    if (e.key === 'End') { e.preventDefault(); current = total-1; show(current); }
+    if (e.key === 't' || e.key === 'T') { toggleTheme(); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+
+  var touchX = 0;
+  document.addEventListener('touchstart', function(e) { touchX = e.touches[0].clientX; });
+  document.addEventListener('touchend', function(e) {
+    var dx = e.changedTouches[0].clientX - touchX;
+    if (dx < -50) next(); if (dx > 50) prev();
+  });
+
+  show(0);
+});
+</script>
+</body>
+</html>

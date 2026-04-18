@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projekt Saturn — Teil 1</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700;900&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f172a;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent: #e91e8a;
+      --accent2: #06b6d4;
+      --accent3: #8b5cf6;
+      --glow-pink: rgba(233,30,138,0.4);
+      --glow-cyan: rgba(6,182,212,0.4);
+      --glow-purple: rgba(139,92,246,0.3);
+      --font-heading: 'Inter', system-ui, sans-serif;
+      --slide-transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    html.fancy {
+      --bg: #020010;
+      --text: #d0e0ff;
+      --text-muted: #5a7aaa;
+      --font-heading: 'Orbitron', sans-serif;
+      --slide-transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; transition: background 0.6s ease, color 0.6s ease; }
+
+    /* ══════════════════════════════════════
+       FANCY-ONLY layers
+       ══════════════════════════════════════ */
+    #starfield, .grid-floor, .orb, .scanlines { opacity: 0; pointer-events: none; transition: opacity 0.8s ease; }
+    html.fancy #starfield, html.fancy .grid-floor, html.fancy .orb, html.fancy .scanlines { opacity: 1; }
+
+    #starfield { position: fixed; inset: 0; z-index: 0; }
+
+    .grid-floor {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 45vh; z-index: 1;
+      background:
+        linear-gradient(to top, rgba(6,182,212,0.06) 0%, transparent 100%),
+        repeating-linear-gradient(90deg, rgba(6,182,212,0.08) 0px, transparent 1px, transparent 80px),
+        repeating-linear-gradient(0deg, rgba(6,182,212,0.08) 0px, transparent 1px, transparent 80px);
+      transform: perspective(500px) rotateX(55deg); transform-origin: bottom center;
+      animation: gridScroll 8s linear infinite;
+    }
+    @keyframes gridScroll { 0% { background-position-y: 0; } 100% { background-position-y: 80px; } }
+
+    .orb { position: fixed; border-radius: 50%; filter: blur(80px); z-index: 1; pointer-events: none; animation: orbFloat 12s ease-in-out infinite alternate; }
+    .orb-1 { width: 400px; height: 400px; top: -100px; left: -100px; background: var(--glow-pink); opacity: 0.3; }
+    .orb-2 { width: 500px; height: 500px; bottom: -150px; right: -150px; background: var(--glow-purple); opacity: 0.25; animation-delay: -4s; }
+    .orb-3 { width: 300px; height: 300px; top: 50%; left: 50%; transform: translate(-50%,-50%); background: var(--glow-cyan); opacity: 0.15; animation-delay: -8s; }
+    @keyframes orbFloat { 0% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px,-20px) scale(1.1); } 100% { transform: translate(-20px,30px) scale(0.95); } }
+    .orb-3 { animation-name: orbFloat3; }
+    @keyframes orbFloat3 { 0% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-45%,-55%) scale(1.15); } 100% { transform: translate(-55%,-45%) scale(0.9); } }
+
+    .scanlines {
+      position: fixed; inset: 0; z-index: 2; pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
+    }
+
+    /* ══════════════════════════════════════
+       Slides
+       ══════════════════════════════════════ */
+    .deck { position: relative; width: 100vw; height: 100vh; z-index: 10; transition: perspective 0.6s ease; }
+    html.fancy .deck { perspective: 1200px; }
+
+    .slide {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      padding: 60px 80px;
+      opacity: 0; pointer-events: none;
+      transition: var(--slide-transition);
+      transform: translateX(40px);
+    }
+    .slide.active { opacity: 1; pointer-events: auto; transform: translateX(0); }
+    .slide.prev  { opacity: 0; pointer-events: none; transform: translateX(-40px); }
+
+    html.fancy .slide       { transform: translateZ(-200px) rotateY(8deg); }
+    html.fancy .slide.active { transform: translateZ(0) rotateY(0); }
+    html.fancy .slide.prev  { transform: translateZ(-200px) rotateY(-8deg); }
+
+    /* ── Typography ── */
+    h1 { font-family: var(--font-heading); font-size: 3.2em; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; text-align: center; transition: font-family 0.3s, font-size 0.3s, letter-spacing 0.3s; }
+    html.fancy h1 { font-size: 3.6em; letter-spacing: 0.05em; }
+    h1 span {
+      display: block;
+      background: linear-gradient(135deg, #e91e8a, #8b5cf6, #06b6d4, #67e8f9);
+      background-size: 300% 300%;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    html.fancy h1 span { animation: gradientShift 6s ease-in-out infinite; }
+    @keyframes gradientShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+    h2 { font-family: var(--font-heading); font-size: 2em; font-weight: 700; color: #f8fafc; margin-bottom: 0.15em; text-align: center; transition: font-family 0.3s, text-shadow 0.3s; }
+    html.fancy h2 { font-size: 1.8em; text-shadow: 0 0 30px var(--glow-cyan), 0 0 60px rgba(6,182,212,0.2); }
+
+    h3 { font-size: 1.1em; font-weight: 400; color: var(--accent2); margin-bottom: 1.2em; text-align: center; transition: letter-spacing 0.3s, text-transform 0.3s; }
+    html.fancy h3 { font-size: 1em; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase; }
+
+    .subtitle { color: var(--text-muted); font-size: 1.1em; margin-top: 0.8em; text-align: center; transition: font-family 0.3s, letter-spacing 0.3s; }
+    html.fancy .subtitle { font-family: 'Orbitron', sans-serif; font-size: 1em; letter-spacing: 0.15em; }
+
+    /* ── Lists ── */
+    ul { list-style: none; max-width: 820px; width: 100%; }
+    ul li { padding: 0.55em 0; font-size: 0.85em; line-height: 1.55; border-bottom: 1px solid rgba(148,163,184,0.1); transition: border-color 0.3s; }
+    html.fancy ul li { border-bottom-color: rgba(6,182,212,0.1); }
+    ul li:last-child { border-bottom: none; }
+    ul li strong { color: var(--accent); transition: text-shadow 0.3s; }
+    html.fancy ul li strong { text-shadow: 0 0 12px var(--glow-pink); }
+
+    /* ── Blockquote ── */
+    blockquote {
+      border-left: 3px solid var(--accent); background: rgba(233,30,138,0.08);
+      padding: 0.6em 1.2em; margin-top: 1.2em; max-width: 820px; width: 100%;
+      font-size: 0.8em; color: #cbd5e1; border-radius: 0 6px 6px 0;
+      transition: border-color 0.3s, background 0.3s, box-shadow 0.3s, backdrop-filter 0.3s;
+    }
+    html.fancy blockquote {
+      border-left-color: var(--accent2); background: rgba(6,182,212,0.06);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px rgba(6,182,212,0.08), inset 0 0 20px rgba(6,182,212,0.03);
+      color: #93c5e8; font-size: 0.78em; border-radius: 0 8px 8px 0;
+    }
+
+    /* ── Tables ── */
+    table {
+      border-collapse: collapse; max-width: 1000px; width: 100%; font-size: 0.78em;
+      background: rgba(15,23,42,0.6); border-radius: 8px; overflow: hidden;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    html.fancy table {
+      background: rgba(2,0,16,0.7);
+      box-shadow: 0 0 20px rgba(6,182,212,0.08), inset 0 0 30px rgba(6,182,212,0.03);
+      backdrop-filter: blur(10px);
+    }
+    th {
+      background: rgba(233,30,138,0.15); color: var(--accent); font-weight: 700;
+      padding: 0.6em 0.8em; text-align: left; border-bottom: 2px solid rgba(233,30,138,0.3);
+      transition: background 0.3s, color 0.3s, text-shadow 0.3s;
+    }
+    html.fancy th {
+      background: rgba(6,182,212,0.1); color: var(--accent2);
+      border-bottom-color: rgba(6,182,212,0.3);
+      text-shadow: 0 0 10px var(--glow-cyan);
+    }
+    td {
+      padding: 0.5em 0.8em; border-bottom: 1px solid rgba(148,163,184,0.08);
+      color: var(--text); transition: border-color 0.3s;
+    }
+    html.fancy td { border-bottom-color: rgba(6,182,212,0.08); }
+    tr:last-child td { border-bottom: none; }
+    td strong { color: var(--accent); }
+    html.fancy td strong { text-shadow: 0 0 8px var(--glow-pink); }
+    td em { color: var(--accent2); font-style: normal; }
+    .highlight-row { background: rgba(233,30,138,0.08); }
+    html.fancy .highlight-row { background: rgba(6,182,212,0.06); }
+
+    /* ── Code / Timeline ── */
+    pre {
+      background: rgba(15,23,42,0.8); border: 1px solid rgba(148,163,184,0.1);
+      border-radius: 8px; padding: 1em 1.5em; max-width: 820px; width: 100%;
+      font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.72em;
+      color: var(--text-muted); line-height: 1.8; margin-top: 0.8em;
+      transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+    }
+    html.fancy pre {
+      background: rgba(2,0,16,0.8); border-color: rgba(6,182,212,0.15);
+      box-shadow: 0 0 15px rgba(6,182,212,0.05);
+    }
+
+    /* ── Split layout ── */
+    .split { display: flex; gap: 2em; width: 100%; max-width: 1100px; align-items: center; flex: 1; min-height: 0; }
+    .split .col { flex: 1; min-width: 0; }
+    .split img { max-width: 100%; height: auto; border-radius: 8px; }
+
+    /* ── Links ── */
+    a { color: var(--accent2); text-decoration: none; border-bottom: 1px solid rgba(6,182,212,0.3); transition: color 0.3s, border-color 0.3s; }
+    a:hover { color: #67e8f9; border-bottom-color: #67e8f9; }
+
+    /* ── Source line ── */
+    .source { font-size: 0.65em; color: var(--text-muted); margin-top: 0.6em; font-style: italic; }
+
+    /* ── Section divider ── */
+    .section-title { font-size: 2.4em; font-weight: 900; }
+    html.fancy .section-title { font-size: 2.6em; }
+
+    /* ── HUD ── */
+    .slide-num { position: fixed; bottom: 20px; right: 32px; font-size: 0.75em; color: #475569; z-index: 100; font-variant-numeric: tabular-nums; transition: font-family 0.3s; }
+    html.fancy .slide-num { font-family: 'Orbitron', sans-serif; font-size: 0.7em; color: #2a4a6a; letter-spacing: 0.1em; }
+
+    .progress { position: fixed; top: 0; left: 0; height: 3px; z-index: 100; background: linear-gradient(90deg, #e91e8a, #8b5cf6, #06b6d4); transition: width 0.4s ease, box-shadow 0.3s; }
+    html.fancy .progress { height: 2px; box-shadow: 0 0 12px var(--glow-cyan), 0 0 30px var(--glow-pink); }
+
+    .hint { position: fixed; bottom: 20px; left: 32px; font-size: 0.65em; color: #334155; z-index: 100; transition: font-family 0.3s; }
+    html.fancy .hint { font-family: 'Orbitron', sans-serif; font-size: 0.55em; color: #1a3a5a; letter-spacing: 0.1em; }
+
+    /* ── Compact ── */
+    .compact h2 { font-size: 1.6em; }
+    .compact h3 { margin-bottom: 0.6em; }
+    .compact table { font-size: 0.7em; }
+    .compact ul li { font-size: 0.75em; padding: 0.35em 0; }
+    .compact blockquote { font-size: 0.7em; margin-top: 0.8em; }
+    html.fancy .compact h2 { font-size: 1.5em; }
+    html.fancy .compact table { font-size: 0.68em; }
+
+    /* ── Theme toggle button ── */
+    .theme-toggle {
+      position: fixed; top: 16px; right: 24px; z-index: 200;
+      background: rgba(100,116,139,0.15); border: 1px solid rgba(100,116,139,0.2);
+      color: #64748b; font-family: 'Inter', sans-serif; font-size: 0.65em;
+      padding: 6px 14px; border-radius: 20px; cursor: pointer;
+      transition: all 0.3s ease; backdrop-filter: blur(8px); letter-spacing: 0.05em;
+    }
+    .theme-toggle:hover { background: rgba(100,116,139,0.25); color: #94a3b8; }
+    html.fancy .theme-toggle { font-family: 'Orbitron', sans-serif; border-color: rgba(6,182,212,0.2); color: #2a4a6a; }
+    html.fancy .theme-toggle:hover { color: #06b6d4; border-color: rgba(6,182,212,0.4); box-shadow: 0 0 15px rgba(6,182,212,0.1); }
+
+    /* ── Fancy entrance animations ── */
+    html.fancy .slide.active h1, html.fancy .slide.active h2 { animation: fadeInUp 0.6s ease both; }
+    html.fancy .slide.active h3 { animation: fadeInUp 0.6s 0.1s ease both; }
+    html.fancy .slide.active table { animation: fadeInUp 0.6s 0.15s ease both; }
+    html.fancy .slide.active ul { animation: fadeInUp 0.6s 0.25s ease both; }
+    html.fancy .slide.active blockquote { animation: fadeInUp 0.6s 0.35s ease both; }
+    html.fancy .slide.active pre { animation: fadeInUp 0.6s 0.3s ease both; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+<div class="grid-floor"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="scanlines"></div>
+
+<div class="progress" id="progress"></div>
+<div class="slide-num" id="slideNum"></div>
+<div class="hint" id="hint">← →  Pfeiltasten · T Theme · F Fullscreen</div>
+<button class="theme-toggle" id="themeToggle">HOLODECK</button>
+
+<div class="deck">
+
+  <!-- SLIDE 1: Title -->
+  <div class="slide">
+    <h1><span>Projekt Saturn</span></h1>
+    <p class="subtitle">Workshop 21. April 2026 · Raben Steinfeld</p>
+  </div>
+
+  <!-- SLIDE 2: Section Divider -->
+  <div class="slide">
+    <h2 class="section-title">Statusbericht: Wettbewerbe &amp; PR</h2>
+  </div>
+
+  <!-- SLIDE 3: Was ist DocVQA? -->
+  <div class="slide compact">
+    <h2>Was ist DocVQA?</h2>
+    <h3>Die Champions League der Dokumenten-KI</h3>
+    <ul>
+      <li><strong>Internationaler Benchmark</strong> für KI-gestütztes Dokumentenverständnis</li>
+      <li><strong>Teilnehmer:</strong> Google, OpenAI, Alibaba, Microsoft, LandingAI + Top-Forschungslabore</li>
+      <li><strong>Organisiert</strong> vom CVC Barcelona unter <strong>ICDAR</strong> (weltweit wichtigste Konferenz für Dokumentenanalyse)</li>
+      <li><strong>Standard-Benchmark seit 2020</strong> — Classic Leaderboard: Alibaba Qwen (96.4%), Google Gemini, OpenAI GPT</li>
+    </ul>
+    <blockquote>
+      <strong>DocVQA 2026 — härteste Edition bisher:</strong><br/>
+      8 Domänen gleichzeitig (Business Reports, Karten, Comics, ...) · Spatial, Temporal &amp; Multi-Hop Reasoning · Weit jenseits einfacher Textextraktion
+    </blockquote>
+  </div>
+
+  <!-- SLIDE 4: Unser Edge -->
+  <div class="slide">
+    <h2>Unser Edge — DocVQA 2026</h2>
+    <div class="split">
+      <div class="col">
+        <img src="DocVQA/value_chain.png" alt="Value Chain" />
+      </div>
+      <div class="col">
+        <ul>
+          <li><strong>DocVQA 2026 (ICDAR)</strong> — härtester Benchmark</li>
+          <li>Frontier allein: <strong>~40%</strong></li>
+          <li>+ IDA: <strong>+7%</strong></li>
+          <li>+ DCA: <strong>+13%</strong> → <strong>60%</strong></li>
+        </ul>
+        <blockquote>
+          <strong>Nachhaltig:</strong> Bessere FMs heben Baseline — IDA/DCA addieren <em>on top</em>.<br/>
+          Modellfortschritt = unser Fortschritt
+        </blockquote>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: Veröffentlichungen & PR -->
+  <div class="slide compact">
+    <h2>Veröffentlichungen &amp; PR-Strategie</h2>
+    <h3>3 wissenschaftliche Papers — alle bis 20. Juni auf arxiv</h3>
+    <table>
+      <tr><th>Paper</th><th>Inhalt</th><th>arxiv-Deadline</th><th>Konferenz-Ziel</th></tr>
+      <tr><td><strong>Tech Report</strong></td><td>DocVQA-Ergebnis, Multi-Agent-Architektur, Value Chain</td><td><strong>25. April</strong></td><td>ICDAR 2027 / CVPR</td></tr>
+      <tr><td><strong>P1 Attractor Dynamics</strong></td><td>Formale Grundlage — Lyapunov, Konvergenz, Memory</td><td><strong>25. Mai</strong></td><td>JMLR / NeurIPS</td></tr>
+      <tr><td><strong>DCA Vision Paper</strong></td><td>Gesamtarchitektur — STBs, fraktale Agenten</td><td><strong>15. Juni</strong></td><td>NeurIPS / AAAI</td></tr>
+    </table>
+    <ul>
+      <li><strong>arxiv</strong> → sofortige Sichtbarkeit in der AI-Community</li>
+      <li><strong>22. Juni: Winners Announced</strong> → Presse-Moment</li>
+      <li><strong>30. Aug – 4. Sept: ICDAR Wien</strong> → Luna-Vorstellung als Competition Winner auf der Bühne</li>
+      <li>Konferenz-Einreichungen laufen parallel (NeurIPS, AAAI, JMLR)</li>
+    </ul>
+    <pre>Apr 25  Tech Report → arxiv
+Mai 25  P1 Attractor → arxiv
+Jun 15  DCA Vision → arxiv
+Jun 20  ✅ Alle 3 Papers live
+Jun 22  🏆 Winners Announced
+Aug 30  🎤 ICDAR Wien — Luna Presentation als Competition Winner</pre>
+    <p class="source">Details: <a href="go_to_market.pdf">go_to_market.pdf</a></p>
+  </div>
+
+  <!-- SLIDE 6: Chatbot vs Knowledge Worker -->
+  <div class="slide compact">
+    <h2>Chatbot vs. Knowledge Worker</h2>
+    <h3>Die meisten verwechseln beides. Der Unterschied ist fundamental.</h3>
+    <table>
+      <tr><th></th><th>Chatbot</th><th>Knowledge Worker</th></tr>
+      <tr><td><strong>Modus</strong></td><td>Fragen beantworten</td><td>Aufgaben lösen</td></tr>
+      <tr><td><strong>Input</strong></td><td>Eine Frage</td><td>Ein Auftrag</td></tr>
+      <tr><td><strong>Output</strong></td><td>Eine Antwort</td><td>Ein Ergebnis</td></tr>
+      <tr><td><strong>Beispiel</strong></td><td><em>"Was steht in §3?"</em></td><td><em>"Prüfe den Vertrag auf Risiken und erstelle eine Redline"</em></td></tr>
+      <tr><td><strong>Wertschöpfung</strong></td><td>Information</td><td>Entscheidung + Aktion</td></tr>
+      <tr><td><strong>Ersetzt</strong></td><td>Google / FAQ</td><td>Sachbearbeiter / Analyst</td></tr>
+      <tr><td><strong>Pricing</strong></td><td>Seat / Abo</td><td>per Case / per Ergebnis</td></tr>
+    </table>
+    <blockquote>
+      <strong>Chatbot</strong> = Suchmaschine mit natürlicher Sprache. Nützlich, aber kein Geschäftsmodell.<br/>
+      <strong>Knowledge Worker</strong> = denkt, entscheidet, liefert ab. Messbar, skalierbar, monetarisierbar.<br/><br/>
+      Wer nur einen Chatbot baut, konkurriert mit ChatGPT. Wer einen Knowledge Worker baut, ersetzt Prozesskosten.
+    </blockquote>
+  </div>
+
+  <!-- SLIDE 7: Anthropic Claude -->
+  <div class="slide compact">
+    <h2>Anthropic: Claude — Knowledge Worker, nicht Chatbot</h2>
+    <table>
+      <tr><th>Produkt</th><th>Was es tut</th><th>Knowledge Worker Fähigkeit</th></tr>
+      <tr><td><strong>Claude Chat</strong></td><td>Konversation, Analyse, Recherche</td><td>1M Token Context, Reasoning, Vision</td></tr>
+      <tr><td><strong>Claude Code</strong></td><td>Autonomer SW-Entwickler</td><td>Terminal, Repo, Tests, Deployment — SWE-bench 80.8%</td></tr>
+      <tr><td><strong>Claude Cowork</strong></td><td>Autonomer Büroarbeiter</td><td>Computer Use, Browser Use, Desktop-Steuerung</td></tr>
+    </table>
+    <ul>
+      <li><strong>Codebase-Vergleich:</strong></li>
+      <li>Claude Code (leaked): <strong>~500.000 LOC</strong> — Schwerpunkt UX, Editor-Integration, Developer Experience</li>
+      <li>Luna: <strong>~250.000 LOC</strong> — Schwerpunkt KI: Agenten, Memory, Document Reasoning</li>
+    </ul>
+    <blockquote>Claude ist heute für Coding das, was Luna morgen für Dokumente sein sollte: ein <strong>Knowledge Worker</strong>, kein Chatbot.</blockquote>
+  </div>
+
+  <!-- SLIDE 8: Battle Card -->
+  <div class="slide compact">
+    <h2>Battle Card: Claude Opus 4.6 vs. Mythos Preview</h2>
+    <h3>Mythos — Anthropics nächste Generation (nicht öffentlich, nur via Project Glasswing)</h3>
+    <table>
+      <tr><th>Benchmark</th><th>Opus 4.6</th><th>Mythos</th><th>Luna (est.)</th></tr>
+      <tr><td>SWE-bench Verified</td><td>80.8%</td><td><strong>93.9%</strong></td><td><em>~89% (+8)</em></td></tr>
+      <tr><td>GPQA Diamond</td><td>91.3%</td><td>94.6%</td><td><em><strong>~95% (+4)</strong></em></td></tr>
+      <tr><td>Humanity's Last Exam</td><td>40.0%</td><td>56.8%</td><td><em><strong>~60% (+20)</strong></em></td></tr>
+      <tr><td>Terminal-Bench 2.0</td><td>65.4%</td><td><strong>82.0%</strong></td><td><em>~79% (+14)</em></td></tr>
+      <tr class="highlight-row"><td><strong>DocVQA 2026</strong></td><td>~40%</td><td>~45%</td><td><em><strong>~60% (+20)</strong></em></td></tr>
+    </table>
+    <p class="source">Schätzung Luna mit IDA + DCA · Quelle: <a href="https://www.all-ai.de/news/news26top/claude-mythos-opus-start" target="_blank">Mythos (all-ai.de)</a></p>
+    <ul>
+      <li><strong>Cybersecurity — Quantensprung:</strong> Browser-Exploits (Firefox 147): Opus 2 → Mythos <strong>181</strong></li>
+      <li><strong>Zero-Day-Entdeckungen:</strong> OpenBSD (27J alt), FreeBSD (17J alt), FFmpeg (16J alt)</li>
+    </ul>
+    <blockquote>Luna nutzt diese Foundation Models — jeder Sprung bei Anthropic = <strong>automatischer Sprung bei uns</strong></blockquote>
+  </div>
+
+  <!-- SLIDE 9: Luna als Knowledge Worker -->
+  <div class="slide">
+    <h2>Luna als Knowledge Worker</h2>
+    <h3>Vier Schichten, ein Produkt</h3>
+    <table>
+      <tr><th>Schicht</th><th>Funktion</th><th>Rolle</th></tr>
+      <tr><td><strong>AI University</strong></td><td>Lernen + Individualisieren</td><td>Vision — Alleinstellung von morgen</td></tr>
+      <tr class="highlight-row"><td><strong>DCA</strong></td><td>Denken + Entscheiden + Konvergieren</td><td><strong>Edge</strong> — unser Vorsprung</td></tr>
+      <tr><td><strong>Foundation Models</strong></td><td>Fähigkeiten + Wissen</td><td>Commodity — extern, austauschbar</td></tr>
+      <tr><td><strong>IDA</strong></td><td>Lesen + Klassifizieren + Extrahieren</td><td>Commodity — Grundlage</td></tr>
+    </table>
+  </div>
+
+  <!-- SLIDE 10: Unsere Position -->
+  <div class="slide">
+    <h2>Unsere Position</h2>
+    <table>
+      <tr><th>Markt</th><th>Wir</th></tr>
+      <tr><td>Dokumente lesen</td><td>Dokumente <strong>verstehen</strong> und Entscheidungen ableiten</td></tr>
+      <tr><td>Chat über Dokumente</td><td><strong>Knowledge Worker</strong> — denkt, lernt, handelt</td></tr>
+      <tr><td>US Cloud</td><td><strong>EU Cloud</strong> — DSGVO by Design</td></tr>
+      <tr><td>Individuelle Lösung</td><td><strong>Skalierbares Produkt</strong> — eine Plattform, beliebige Verticals</td></tr>
+    </table>
+    <blockquote>Infrastruktur existiert. <strong>Intelligenz fehlt.</strong><br/>Partner (IONOS, StackIT) sind Beschleuniger — nicht Voraussetzung.</blockquote>
+  </div>
+
+  <!-- SLIDE 11: Zusammenfassung -->
+  <div class="slide">
+    <h2>Zusammenfassung Teil 1</h2>
+    <table>
+      <tr><th>Dimension</th><th>Status</th></tr>
+      <tr><td><strong>Edge</strong></td><td>DocVQA 60% — +20% über Frontier allein</td></tr>
+      <tr><td><strong>Differenzierung</strong></td><td>IDA + DCA — nicht kopierbar durch größere Modelle</td></tr>
+      <tr><td><strong>vs. Big Tech</strong></td><td>Die bauen Motoren, wir bauen Autos</td></tr>
+      <tr><td><strong>Produkt</strong></td><td>Knowledge Worker, nicht Chatbot</td></tr>
+      <tr><td><strong>Markt</strong></td><td>EU-souverän, ergebnisorientiert, skalierbar</td></tr>
+    </table>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// 3D Starfield
+// ═══════════════════════════════════════
+(function() {
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  const NUM_STARS = 600;
+  const stars = [];
+
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  window.addEventListener('resize', resize);
+  resize();
+
+  for (let i = 0; i < NUM_STARS; i++) {
+    stars.push({
+      x: (Math.random() - 0.5) * W * 2,
+      y: (Math.random() - 0.5) * H * 2,
+      z: Math.random() * 1500 + 200,
+      color: ['#fff','#a5d8ff','#d0bfff','#fcc2d7','#99e9f2'][Math.floor(Math.random()*5)]
+    });
+  }
+
+  function draw() {
+    ctx.fillStyle = 'rgba(2, 0, 16, 0.25)';
+    ctx.fillRect(0, 0, W, H);
+    const cx = W / 2, cy = H / 2;
+    for (const s of stars) {
+      s.z -= 0.8;
+      if (s.z <= 1) { s.x = (Math.random()-0.5)*W*2; s.y = (Math.random()-0.5)*H*2; s.z = 1500; }
+      const sx = cx + s.x/s.z*400, sy = cy + s.y/s.z*400;
+      const r = Math.max(0.3, (1-s.z/1500)*2.2);
+      const a = Math.max(0.1, (1-s.z/1500));
+      const px = cx + s.x/(s.z+2)*400, py = cy + s.y/(s.z+2)*400;
+      ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(sx,sy);
+      ctx.strokeStyle = s.color; ctx.globalAlpha = a*0.4; ctx.lineWidth = r*0.6; ctx.stroke();
+      ctx.beginPath(); ctx.arc(sx,sy,r,0,Math.PI*2);
+      ctx.fillStyle = s.color; ctx.globalAlpha = a; ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ═══════════════════════════════════════
+// Theme Toggle
+// ═══════════════════════════════════════
+var isFancy = false;
+function toggleTheme() {
+  isFancy = !isFancy;
+  document.documentElement.classList.toggle('fancy', isFancy);
+  document.getElementById('themeToggle').textContent = isFancy ? 'STANDARD' : 'HOLODECK';
+}
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+// ═══════════════════════════════════════
+// Slide Navigation
+// ═══════════════════════════════════════
+window.addEventListener('load', function() {
+  var slides = document.querySelectorAll('.slide');
+  var total = slides.length;
+  var current = 0;
+
+  function show(n) {
+    slides.forEach(function(s, i) {
+      s.classList.remove('active', 'prev');
+      if (i === n) s.classList.add('active');
+      else if (i < n) s.classList.add('prev');
+    });
+    document.getElementById('slideNum').textContent = (n+1) + ' / ' + total;
+    document.getElementById('progress').style.width = ((n+1)/total*100) + '%';
+  }
+
+  function next() { if (current < total-1) { current++; show(current); } }
+  function prev() { if (current > 0) { current--; show(current); } }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prev(); }
+    if (e.key === 'Home') { e.preventDefault(); current = 0; show(current); }
+    if (e.key === 'End') { e.preventDefault(); current = total-1; show(current); }
+    if (e.key === 't' || e.key === 'T') { toggleTheme(); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+
+  var touchX = 0;
+  document.addEventListener('touchstart', function(e) { touchX = e.touches[0].clientX; });
+  document.addEventListener('touchend', function(e) {
+    var dx = e.changedTouches[0].clientX - touchX;
+    if (dx < -50) next(); if (dx > 50) prev();
+  });
+
+  show(0);
+});
+</script>
+</body>
+</html>
