@@ -130,35 +130,89 @@
   <div class="slide">
     <h2>Kontext</h2>
     <ul>
-      <li><strong>Bechtle AG</strong> — größter deutscher IT-Systemintegrator</li>
-      <li>Bearbeitet hohe Volumina an öffentlichen und privaten Ausschreibungen</li>
-      <li>Ausschreibungsdokumente sind komplex, heterogen und zeitkritisch</li>
+      <li><strong>Bechtle AG</strong> — führender IT-Dienstleister in Europa, 120+ Standorte, 14 Länder, 16.000+ Mitarbeitende</li>
+      <li><strong>Public Sector = 40% des Konzernumsatzes</strong> (~3,2 Mrd. € bei 8 Mrd. € gesamt)</li>
+      <li>Bearbeitet regelmäßig komplexe Ausschreibungen aller Institutionen des Public Sectors</li>
     </ul>
   </div>
 
-  <!-- SLIDE 3: Lösung -->
-  <div class="slide">
-    <h2>Lösung</h2>
-    <h3>Luna unterstützt das Ausschreibungsmanagement</h3>
+  <!-- SLIDE 3: Problem -->
+  <div class="slide compact">
+    <h2>Problem</h2>
+    <h3>Komplexität trifft auf Zeitdruck</h3>
     <table>
-      <tr><th>Funktion</th><th>Was Luna tut</th></tr>
-      <tr><td><strong>Datenextraktion</strong></td><td>Automatische Extraktion aus Ausschreibungsdokumenten (PDFs, DOCX, Portale)</td></tr>
-      <tr><td><strong>Dialogbasierte Analyse</strong></td><td>Fragen an die Ausschreibung stellen, Anforderungen verstehen, Eignungskriterien prüfen</td></tr>
-      <tr><td><strong>Historisches Wissen</strong></td><td>Zugriff auf vergangene Ausschreibungen, Angebote und Ergebnisse</td></tr>
+      <tr><th>Dimension</th><th>Situation</th></tr>
+      <tr><td><strong>Volumen</strong></td><td>600+ Seiten pro Ausschreibung</td></tr>
+      <tr><td><strong>Vielfalt</strong></td><td>Unterschiedliche Dokumentenformate</td></tr>
+      <tr><td><strong>Uneinheitlichkeit</strong></td><td>Eigene Strukturen und Benennungen je Auftraggeber</td></tr>
+      <tr><td><strong>Zeitdruck</strong></td><td>Manuelle Extraktion von Fristen, Leistungsumfang, Haftungsfragen</td></tr>
+      <tr><td><strong>Fehlerrisiko</strong></td><td>Ein übersehener Punkt kann zum Ausschluss aus dem Vergabeverfahren führen</td></tr>
+    </table>
+    <blockquote>Qualifiziertes Fachpersonal ist an repetitive Tätigkeiten gebunden. Historische Ausschreibungen sind nicht systematisch durchsuchbar.</blockquote>
+  </div>
+
+  <!-- SLIDE 4: Lösung -->
+  <div class="slide">
+    <h2>Lösung: Drei zentrale Funktionen</h2>
+    <table>
+      <tr><th>Funktion</th><th>Was es tut</th></tr>
+      <tr><td><strong>Intelligente Datenextraktion</strong></td><td>Automatische Identifikation der Standardinformationen mit >90% Genauigkeit, Vorschläge mit Quellreferenz, integrierte Review-Funktion</td></tr>
+      <tr><td><strong>„Talk to Tender"</strong></td><td>Chat-Interface für individuelle Fragen an die Ausschreibungsdokumente, dokumentenübergreifende Analyse, jede Antwort mit Quellreferenz</td></tr>
+      <tr><td><strong>„Talk to Archive"</strong></td><td>Zugriff auf historische Ausschreibungen und Erfahrungswissen, Vorschläge für Textformulierungen und Bieterfragen</td></tr>
+    </table>
+    <blockquote>Basiert auf der JAIDE-Architektur mit LLM-Agenten und spezialisierten RAG-Tools — weit über generische Tools wie ChatGPT hinaus.</blockquote>
+  </div>
+
+  <!-- SLIDE 5: Ergebnisse -->
+  <div class="slide">
+    <h2>Ergebnisse</h2>
+    <table>
+      <tr><th>Metrik</th><th>Wert</th></tr>
+      <tr><td><strong>Extraktionsgenauigkeit</strong></td><td>>90% für fundierte Erstbewertungen</td></tr>
+      <tr><td><strong>Qualitätssicherung</strong></td><td>2-fache Kontrolle durch Mensch und KI (Vier-Augen-Prinzip)</td></tr>
+      <tr><td><strong>Wissensnutzung</strong></td><td>100% des Archivwissens zugänglich</td></tr>
+      <tr><td><strong>Zeitersparnis</strong></td><td>Was vorher Stunden dauerte, in einem Bruchteil der Zeit</td></tr>
     </table>
   </div>
 
-  <!-- SLIDE 4: Referenz -->
+  <!-- SLIDE 6: Stimmen -->
+  <div class="slide compact">
+    <h2>Stimmen aus dem Einsatz</h2>
+    <blockquote>
+      <em>„Die Lösung von PLANET AI erleichtert unseren Alltag enorm. Das Tool übernimmt repetitive Aufgaben und schafft Freiraum für strategisch wichtige Themen."</em><br/>
+      — <strong>Dr. Alexander Fink</strong>, Head of Public Sector Innovations, Bechtle AG
+    </blockquote>
+    <blockquote>
+      <em>„Ich war überrascht, wie gut die KI Ausschreibungen versteht und auch zwischen den Zeilen lesen kann. Sie erkennt Zusammenhänge zwischen Anforderungen, die über hunderte Seiten verteilt sind."</em><br/>
+      — <strong>Benjamin Bader</strong>, Head of Tender Management Germany, Bechtle AG
+    </blockquote>
+    <blockquote>
+      <em>„Besonders wertvoll ist die Quellreferenz bei jeder Information: Ich kann sofort zur entsprechenden Stelle im Dokument springen und den Kontext prüfen."</em><br/>
+      — <strong>Iris Assfalg</strong>, Tender Manager France, Bechtle AG
+    </blockquote>
+  </div>
+
+  <!-- SLIDE 7: Ausblick -->
+  <div class="slide">
+    <h2>Ausblick</h2>
+    <h3>Ziel: Durchgängiger Workflow vom Eingang bis zur Angebotsabgabe</h3>
+    <table>
+      <tr><th>Meilenstein</th><th>Beschreibung</th></tr>
+      <tr><td><strong>CRM-Integration</strong></td><td>Automatisierter Ausschreibungseingang, Download von Portalen, Analyse und Einspeisung ins CRM</td></tr>
+      <tr><td><strong>Internationale Expansion</strong></td><td>Ausweitung auf weitere Bechtle Standorte in Europa, zusätzliche Sprachen</td></tr>
+      <tr><td><strong>Deep-Research</strong></td><td>Erweiterte Analysefunktionen, technische Bewertungen, Anbieterrecherchen</td></tr>
+    </table>
+  </div>
+
+  <!-- SLIDE 8: Referenz -->
   <div class="slide">
     <h2>Referenz</h2>
-    <blockquote>
-      <em>„Bechtle setzt auf KI-gestütztes Ausschreibungsmanagement: automatische Datenextraktion, dialogbasierte Analyse und Zugriff auf historisches Wissen."</em>
-    </blockquote>
     <p class="note">
-      Veröffentlichte Fallstudie:<br/>
-      <a href="https://planet-ai.com/de/referenzen/ausschreibungsmanagement-bechtle/" target="_blank">planet-ai.com/de/referenzen/ausschreibungsmanagement-bechtle/</a>
+      Case Study (PDF): <a href="Tender/Case-Study_Bechtle-Tender-Management_PLANET-AI_DE.pdf" target="_blank">Case-Study_Bechtle-Tender-Management_PLANET-AI_DE.pdf</a>
     </p>
-    <p class="note"><em>Details werden im Workshop ergänzt.</em></p>
+    <p class="note">
+      Veröffentlichte Fallstudie: <a href="https://planet-ai.com/de/referenzen/ausschreibungsmanagement-bechtle/" target="_blank">planet-ai.com/de/referenzen/ausschreibungsmanagement-bechtle/</a>
+    </p>
   </div>
 
 </div>
