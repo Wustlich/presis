@@ -275,7 +275,7 @@
 <div class="grid-floor"></div>
 <div class="bridge-deck">
   <div class="deck-row">
-    <div class="deck-text deck-nav" id="deckNav">◀ ▶  NAV · T THEME · D BRIGHT · F FULL</div>
+    <div class="deck-text deck-nav" id="deckNav">◀ ▶  NAV · T THEME · F FULL</div>
     <div class="deck-text deck-prev" id="deckPrev"></div>
     <div class="deck-text deck-title" id="deckTitle">PLANET AI</div>
     <div class="deck-text deck-next" id="deckNext"></div>
@@ -537,7 +537,7 @@ var isFancy = false;
 function toggleTheme() {
   isFancy = !isFancy; if (isFancy) document.documentElement.classList.remove('bright');
   document.documentElement.classList.toggle('fancy', isFancy);
-  document.getElementById('themeToggle').textContent = isFancy ? 'STANDARD' : 'HOLODECK';
+  document.getElementById('themeToggle').textContent = isFancy ? 'STANDARD' : 'HOLODECK';var hi=document.getElementById('hint');if(hi)hi.textContent=isFancy?'← → · T THEME · F FULL':'← → · T THEME · D BRIGHT · F FULL';
 }
 document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
