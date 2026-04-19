@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -40 1200 740" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="curveGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#00d4ff" stop-opacity="0.01"/>
+    </linearGradient>
+    <linearGradient id="singZone" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff0055" stop-opacity="0.0"/>
+      <stop offset="50%" stop-color="#ff0055" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#ff0055" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="topFade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d1117" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#0d1117" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect y="-40" width="1200" height="740" fill="#0d1117" rx="12"/>
+
+  <!-- Title -->
+  <text x="600" y="45" text-anchor="middle" fill="#00ffff" font-size="26" font-weight="bold">Die Singularität — Exponentielle KI-Entwicklung</text>
+
+  <!-- Grid lines horizontal -->
+  <g stroke="#ffffff" stroke-opacity="0.06" stroke-width="1">
+    <line x1="100" y1="180" x2="1100" y2="180"/>
+    <line x1="100" y1="280" x2="1100" y2="280"/>
+    <line x1="100" y1="380" x2="1100" y2="380"/>
+    <line x1="100" y1="480" x2="1100" y2="480"/>
+  </g>
+
+  <!-- Grid lines vertical -->
+  <g stroke="#ffffff" stroke-opacity="0.06" stroke-width="1">
+    <line x1="213" y1="80" x2="213" y2="600"/>
+    <line x1="326" y1="80" x2="326" y2="600"/>
+    <line x1="440" y1="80" x2="440" y2="600"/>
+    <line x1="553" y1="80" x2="553" y2="600"/>
+    <line x1="666" y1="80" x2="666" y2="600"/>
+    <line x1="780" y1="80" x2="780" y2="600"/>
+    <line x1="893" y1="80" x2="893" y2="600"/>
+    <line x1="1006" y1="80" x2="1006" y2="600"/>
+  </g>
+
+  <!-- X-Axis labels -->
+  <g fill="#666" font-size="12" text-anchor="middle">
+    <text x="100" y="625">1950</text>
+    <text x="213" y="625">1960</text>
+    <text x="326" y="625">1970</text>
+    <text x="440" y="625">1980</text>
+    <text x="553" y="625">1990</text>
+    <text x="666" y="625">2000</text>
+    <text x="780" y="625">2010</text>
+    <text x="893" y="625">2020</text>
+    <text x="1006" y="625">2030</text>
+    <text x="1100" y="625">2038</text>
+  </g>
+
+  <!-- Y-Axis label -->
+  <text x="30" y="340" fill="#666" font-size="13" text-anchor="middle" transform="rotate(-90 30 340)">Intelligenz / Fähigkeit</text>
+  <text x="600" y="660" fill="#666" font-size="13" text-anchor="middle">Jahr</text>
+
+  <!-- Singularity zone -->
+  <rect x="1010" y="-40" width="190" height="740" fill="url(#singZone)"/>
+
+  <!-- ============ CURVE ============ -->
+
+  <!-- Fill under curve -->
+  <path d="M 100,596 L 150,596 L 213,595 L 270,595 L 326,594 L 383,593 L 440,592 
+           L 497,590 L 553,587 L 600,584 L 640,580 L 666,576 
+           L 700,570 L 735,560 L 758,552 L 780,540 
+           L 810,520 L 838,495 L 860,468 L 880,438 
+           L 900,400 L 920,350 L 940,285 L 955,220 
+           L 968,150 L 978,80 L 985,10 L 988,-60
+           L 988,600 L 100,600 Z"
+        fill="url(#curveGrad)"/>
+
+  <!-- Outer glow -->
+  <path d="M 100,596 L 150,596 L 213,595 L 270,595 L 326,594 L 383,593 L 440,592 
+           L 497,590 L 553,587 L 600,584 L 640,580 L 666,576 
+           L 700,570 L 735,560 L 758,552 L 780,540 
+           L 810,520 L 838,495 L 860,468 L 880,438 
+           L 900,400 L 920,350 L 940,285 L 955,220 
+           L 968,150 L 978,80 L 985,10 L 988,-80"
+        fill="none" stroke="#00d4ff" stroke-width="8" stroke-opacity="0.12" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Mid glow -->
+  <path d="M 100,596 L 150,596 L 213,595 L 270,595 L 326,594 L 383,593 L 440,592 
+           L 497,590 L 553,587 L 600,584 L 640,580 L 666,576 
+           L 700,570 L 735,560 L 758,552 L 780,540 
+           L 810,520 L 838,495 L 860,468 L 880,438 
+           L 900,400 L 920,350 L 940,285 L 955,220 
+           L 968,150 L 978,80 L 985,10 L 988,-80"
+        fill="none" stroke="#00d4ff" stroke-width="3.5" stroke-opacity="0.35" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Core line -->
+  <path d="M 100,596 L 150,596 L 213,595 L 270,595 L 326,594 L 383,593 L 440,592 
+           L 497,590 L 553,587 L 600,584 L 640,580 L 666,576 
+           L 700,570 L 735,560 L 758,552 L 780,540 
+           L 810,520 L 838,495 L 860,468 L 880,438 
+           L 900,400 L 920,350 L 940,285 L 955,220 
+           L 968,150 L 978,80 L 985,10 L 988,-80"
+        fill="none" stroke="#00ffff" stroke-width="2" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Arrow indicating "off the chart" at top -->
+  <polygon points="988,-10 978,15 998,15" fill="#00ffff" opacity="0.8"/>
+  <polygon points="988,-10 980,12 996,12" fill="#00ffff" opacity="0.4"/>
+
+  <!-- ============ MILESTONE LABELS — alle rechts neben dem Punkt ============ -->
+
+  <!-- 1. Turing-Test 1950 — cx=100, cy=596 -->
+  <circle cx="100" cy="596" r="5" fill="#00d4ff" stroke="#fff" stroke-width="1"/>
+  <text x="100" y="584" text-anchor="middle" fill="#88e8ff" font-size="10" font-weight="bold">Turing-Test</text>
+
+  <!-- 2. ELIZA 1966 — cx=182, cy=595 -->
+  <circle cx="182" cy="595" r="5" fill="#00d4ff" stroke="#fff" stroke-width="1"/>
+  <text x="182" y="583" text-anchor="middle" fill="#88e8ff" font-size="10" font-weight="bold">ELIZA</text>
+
+  <!-- 3. KI-Winter 1980 — cx=440, cy=592 -->
+  <circle cx="440" cy="592" r="5" fill="#00d4ff" stroke="#fff" stroke-width="1"/>
+  <text x="440" y="580" text-anchor="middle" fill="#88e8ff" font-size="10" font-weight="bold">KI-Winter</text>
+
+  <!-- 4. Deep Blue vs Kasparov 1997 — cx=634, cy=578 -->
+  <circle cx="634" cy="578" r="5" fill="#00d4ff" stroke="#fff" stroke-width="1"/>
+  <text x="634" y="566" text-anchor="middle" fill="#88e8ff" font-size="10" font-weight="bold">Deep Blue vs Kasparov</text>
+
+  <!-- 5. AlphaGo 2012 — cx=803, cy=530 -->
+  <circle cx="803" cy="530" r="5" fill="#00d4ff" stroke="#fff" stroke-width="1"/>
+  <line x1="813" y1="530" x2="833" y2="530" stroke="#00d4ff" stroke-width="1.2" stroke-opacity="0.5"/>
+  <text x="837" y="534" fill="#88e8ff" font-size="11" font-weight="bold">AlphaGo</text>
+
+  <!-- 6. Transformer 2017 — cx=860, cy=468 -->
+  <circle cx="860" cy="468" r="6" fill="#ff0055" stroke="#fff" stroke-width="1"/>
+  <line x1="871" y1="468" x2="891" y2="468" stroke="#f5a623" stroke-width="1.2" stroke-opacity="0.5"/>
+  <text x="895" y="472" fill="#00ffff" font-size="11" font-weight="bold">Transformer-Architektur</text>
+
+  <!-- 7. GPT-3 2020 — cx=893, cy=410 -->
+  <circle cx="893" cy="410" r="6" fill="#ff0055" stroke="#fff" stroke-width="1"/>
+  <line x1="904" y1="410" x2="924" y2="410" stroke="#f5a623" stroke-width="1.2" stroke-opacity="0.5"/>
+  <text x="928" y="414" fill="#00ffff" font-size="11" font-weight="bold">GPT</text>
+
+  <!-- 8. Claude 2023 — cx=927, cy=340 -->
+  <circle cx="927" cy="340" r="6" fill="#ff0055" stroke="#fff" stroke-width="1"/>
+  <line x1="938" y1="340" x2="958" y2="340" stroke="#f5a623" stroke-width="1.2" stroke-opacity="0.5"/>
+  <text x="962" y="344" fill="#00ffff" font-size="11" font-weight="bold">Claude</text>
+
+  <!-- 9. Luna 2025 — cx=950, cy=270 -->
+  <circle cx="950" cy="270" r="6" fill="#ff0055" stroke="#fff" stroke-width="1"/>
+  <line x1="961" y1="270" x2="981" y2="270" stroke="#f5a623" stroke-width="1.2" stroke-opacity="0.5"/>
+  <text x="985" y="274" fill="#00ffff" font-size="11" font-weight="bold">Luna</text>
+
+  <!-- 10. AGI? 2029 — cx=968, cy=150 -->
+  <circle cx="968" cy="150" r="7" fill="#ff0055" stroke="#fff" stroke-width="1.2"/>
+  <line x1="980" y1="150" x2="1005" y2="150" stroke="#ff0055" stroke-width="1.2" stroke-opacity="0.5"/>
+  <rect x="1009" y="137" width="55" height="24" rx="5" fill="#0d1117" fill-opacity="0.9" stroke="#ff0055" stroke-width="0.8"/>
+  <text x="1025" y="154" fill="#00ffff" font-size="12" font-weight="bold">AGI</text>
+
+  <!-- 11. Rekursive Selbstverbesserung 2033 — cx=980, cy=60 -->
+  <circle cx="980" cy="60" r="7" fill="#ff0055" stroke="#fff" stroke-width="1.2"/>
+  <line x1="992" y1="60" x2="1012" y2="60" stroke="#ff0055" stroke-width="1.2" stroke-opacity="0.5"/>
+  <rect x="1016" y="47" width="210" height="24" rx="5" fill="#0d1117" fill-opacity="0.9" stroke="#ff0055" stroke-width="0.8"/>
+  <text x="1024" y="64" fill="#00ffff" font-size="11" font-weight="bold">Rekursive Selbstverbesserung</text>
+
+  <!-- 12. SINGULARITÄT — cx=988, cy=10 -->
+  <circle cx="988" cy="10" r="9" fill="#ff0055" stroke="#fff" stroke-width="1.5">
+    <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <line x1="1002" y1="10" x2="1030" y2="10" stroke="#ff0055" stroke-width="1.5" stroke-opacity="0.6"/>
+  <rect x="1034" y="-5" width="145" height="30" rx="6" fill="#0d1117" fill-opacity="0.9" stroke="#ff0055" stroke-width="1.5"/>
+  <text x="1048" y="16" fill="#00ffff" font-size="15" font-weight="bold">SINGULARITÄT</text>
+
+  <!-- Big question mark in the singularity zone -->
+  <text x="1120" y="420" text-anchor="middle" fill="#ff0055" font-size="120" font-weight="bold" opacity="0.12">?</text>
+
+  <!-- Top fade -->
+
+  <!-- Axes -->
+  <line x1="100" y1="600" x2="1100" y2="600" stroke="#444" stroke-width="1"/>
+  <line x1="100" y1="80" x2="100" y2="600" stroke="#444" stroke-width="1"/>
+
+  <!-- Dashed line: "human level" reference -->
+  <line x1="100" y1="255" x2="970" y2="255" stroke="#ffffff" stroke-width="0.8" stroke-opacity="0.15" stroke-dasharray="6 4"/>
+  <text x="105" y="250" fill="#ffffff" font-size="18" opacity="0.25">menschliches Niveau</text>
+
+  <!-- Quote -->
+  <text x="600" y="685" text-anchor="middle" fill="#444" font-size="21" font-style="italic">"Ab einem bestimmten Punkt wird der Fortschritt so schnell, dass er jede Vorhersage unmöglich macht." — Ray Kurzweil</text>
+</svg>
