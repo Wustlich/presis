@@ -66,21 +66,21 @@
     html.fancy .slide.active { transform: translateZ(0) rotateY(0); }
     html.fancy .slide.prev  { transform: translateZ(-200px) rotateY(-8deg); }
 
-    h1 { font-family: var(--font-heading); font-size: 3.2em; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; text-align: center; transition: font-family 0.3s, font-size 0.3s, letter-spacing 0.3s; }
-    html.fancy h1 { font-size: 3.6em; letter-spacing: 0.05em; }
+    h1 { font-family: var(--font-heading); font-size: 4.8em; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; text-align: center; transition: font-family 0.3s, font-size 0.3s, letter-spacing 0.3s; }
+    html.fancy h1 { font-size: 5.2em; letter-spacing: 0.05em; }
     h1 span { display: block; background: linear-gradient(135deg, #e91e8a, #8b5cf6, #06b6d4, #67e8f9); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     html.fancy h1 span { animation: gradientShift 6s ease-in-out infinite; }
     @keyframes gradientShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 
-    h2 { font-family: var(--font-heading); font-size: 2.4em; font-weight: 700; color: #f8fafc; margin-bottom: 0.5em; text-align: center; transition: font-family 0.3s, text-shadow 0.3s; }
-    html.fancy h2 { font-size: 2.2em; text-shadow: 0 0 30px var(--glow-cyan), 0 0 60px rgba(6,182,212,0.2); }
-    h3 { font-size: 1.3em; font-weight: 400; color: var(--accent2); margin-bottom: 1.2em; text-align: center; transition: letter-spacing 0.3s, text-transform 0.3s; }
-    html.fancy h3 { font-size: 1.2em; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase; }
-    .subtitle { color: var(--text-muted); font-size: 1.1em; margin-top: 0.8em; text-align: center; }
+    h2 { font-family: var(--font-heading); font-size: 3.4em; font-weight: 700; color: #f8fafc; margin-bottom: 0.5em; text-align: center; transition: font-family 0.3s, text-shadow 0.3s; }
+    html.fancy h2 { font-size: 3.2em; text-shadow: 0 0 30px var(--glow-cyan), 0 0 60px rgba(6,182,212,0.2); }
+    h3 { font-size: 1.8em; font-weight: 400; color: var(--accent2); margin-bottom: 1.2em; text-align: center; transition: letter-spacing 0.3s, text-transform 0.3s; }
+    html.fancy h3 { font-size: 1.7em; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase; }
+    .subtitle { color: var(--text-muted); font-size: 1.5em; margin-top: 0.8em; text-align: center; }
     html.fancy .subtitle { font-family: 'Orbitron', sans-serif; font-size: 1em; letter-spacing: 0.15em; }
 
-    ul { list-style: none; max-width: 1400px; width: 100%; }
-    ul li { padding: 0.55em 0; font-size: 1.05em; line-height: 1.6; border-bottom: 1px solid rgba(148,163,184,0.1); }
+    ul { list-style: none; max-width: 1600px; width: 100%; }
+    ul li { padding: 0.55em 0; font-size: 1.5em; line-height: 1.6; border-bottom: 1px solid rgba(148,163,184,0.1); }
     html.fancy ul li { border-bottom-color: rgba(6,182,212,0.1); }
     ul li:last-child { border-bottom: none; }
     ul li strong { color: var(--accent); }
@@ -89,7 +89,7 @@
     blockquote {
       border-left: 3px solid var(--accent); background: rgba(233,30,138,0.08);
       padding: 0.6em 1.2em; margin-top: 1.2em; max-width: 1400px; width: 100%;
-      font-size: 0.95em; color: #cbd5e1; border-radius: 0 6px 6px 0;
+      font-size: 1.3em; color: #cbd5e1; border-radius: 0 6px 6px 0;
     }
     html.fancy blockquote {
       border-left-color: var(--accent2); background: rgba(6,182,212,0.06);
@@ -98,13 +98,13 @@
     }
 
     table {
-      border-collapse: collapse; max-width: 1400px; width: 100%; font-size: 1em;
+      border-collapse: collapse; max-width: 1400px; width: 100%; font-size: 1.4em;
       background: rgba(15,23,42,0.6); border-radius: 8px; overflow: hidden;
     }
     html.fancy table { background: rgba(2,0,16,0.7); box-shadow: 0 0 20px rgba(6,182,212,0.08); backdrop-filter: blur(10px); }
-    th { background: rgba(233,30,138,0.15); color: var(--accent); font-weight: 700; padding: 0.75em 1.1em; text-align: left; border-bottom: 2px solid rgba(233,30,138,0.3); }
+    th { background: rgba(233,30,138,0.15); color: var(--accent); font-weight: 700; padding: 0.8em 1.2em; text-align: left; border-bottom: 2px solid rgba(233,30,138,0.3); }
     html.fancy th { background: rgba(6,182,212,0.1); color: var(--accent2); border-bottom-color: rgba(6,182,212,0.3); text-shadow: 0 0 10px var(--glow-cyan); }
-    td { padding: 0.65em 1.1em; border-bottom: 1px solid rgba(148,163,184,0.08); color: var(--text); }
+    td { padding: 0.75em 1.2em; border-bottom: 1px solid rgba(148,163,184,0.08); color: var(--text); }
     html.fancy td { border-bottom-color: rgba(6,182,212,0.08); }
     tr:last-child td { border-bottom: none; }
     td strong { color: var(--accent); }
@@ -116,9 +116,9 @@
     .source { font-size: 0.65em; color: var(--text-muted); margin-top: 0.6em; font-style: italic; }
     a { color: var(--accent2); text-decoration: none; border-bottom: 1px solid rgba(6,182,212,0.3); }
     a:hover { color: #67e8f9; border-bottom-color: #67e8f9; }
-    .section-title { font-size: 2.4em; font-weight: 900; }
-    html.fancy .section-title { font-size: 2.6em; }
-    .note { font-size: 0.72em; color: var(--text-muted); margin-top: 0.8em; max-width: 820px; text-align: center; }
+    .section-title { font-size: 3.6em; font-weight: 900; }
+    html.fancy .section-title { font-size: 3.8em; }
+    .note { font-size: 1em; color: var(--text-muted); margin-top: 0.8em; max-width: 820px; text-align: center; }
 
     .slide-num { position: fixed; bottom: 20px; right: 32px; font-size: 0.75em; color: #475569; z-index: 100; font-variant-numeric: tabular-nums; }
     html.fancy .slide-num { font-family: 'Orbitron', sans-serif; font-size: 0.7em; color: #2a4a6a; letter-spacing: 0.1em; }
@@ -127,13 +127,13 @@
     .hint { position: fixed; bottom: 20px; left: 32px; font-size: 0.65em; color: #334155; z-index: 100; }
     html.fancy .hint { font-family: 'Orbitron', sans-serif; font-size: 0.55em; color: #1a3a5a; letter-spacing: 0.1em; }
 
-    .compact h2 { font-size: 2em; }
+    .compact h2 { font-size: 2.8em; }
     .compact h3 { margin-bottom: 0.6em; }
-    .compact table { font-size: 0.92em; }
-    .compact ul li { font-size: 0.95em; padding: 0.35em 0; }
-    .compact blockquote { font-size: 0.9em; margin-top: 0.8em; }
-    html.fancy .compact h2 { font-size: 1.9em; }
-    html.fancy .compact table { font-size: 0.88em; }
+    .compact table { font-size: 1.3em; }
+    .compact ul li { font-size: 1.3em; padding: 0.35em 0; }
+    .compact blockquote { font-size: 1.2em; margin-top: 0.8em; }
+    html.fancy .compact h2 { font-size: 2.6em; }
+    html.fancy .compact table { font-size: 1.2em; }
 
     .theme-toggle {
       position: fixed; top: 16px; right: 24px; z-index: 200;
