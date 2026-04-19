@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Use Case: Ausschreibungsmanagement Bechtle</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700;900&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f172a; --text: #e2e8f0; --text-muted: #94a3b8;
+      --accent: #e91e8a; --accent2: #06b6d4; --accent3: #8b5cf6;
+      --glow-pink: rgba(233,30,138,0.4); --glow-cyan: rgba(6,182,212,0.4); --glow-purple: rgba(139,92,246,0.3);
+      --font-heading: 'Inter', system-ui, sans-serif;
+      --slide-transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    html.fancy {
+      --bg: #020010; --text: #d0e0ff; --text-muted: #5a7aaa;
+      --font-heading: 'Orbitron', sans-serif;
+      --slide-transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; transition: background 0.6s ease, color 0.6s ease; }
+
+    #starfield, .grid-floor, .orb, .scanlines { opacity: 0; pointer-events: none; transition: opacity 0.8s ease; }
+    html.fancy #starfield, html.fancy .grid-floor, html.fancy .orb, html.fancy .scanlines { opacity: 1; }
+    #starfield { position: fixed; inset: 0; z-index: 0; }
+    .grid-floor { position: fixed; bottom: 0; left: 0; right: 0; height: 45vh; z-index: 1; background: linear-gradient(to top, rgba(6,182,212,0.06) 0%, transparent 100%), repeating-linear-gradient(90deg, rgba(6,182,212,0.08) 0px, transparent 1px, transparent 80px), repeating-linear-gradient(0deg, rgba(6,182,212,0.08) 0px, transparent 1px, transparent 80px); transform: perspective(500px) rotateX(55deg); transform-origin: bottom center; animation: gridScroll 8s linear infinite; }
+    @keyframes gridScroll { 0% { background-position-y: 0; } 100% { background-position-y: 80px; } }
+    .orb { position: fixed; border-radius: 50%; filter: blur(80px); z-index: 1; pointer-events: none; animation: orbFloat 12s ease-in-out infinite alternate; }
+    .orb-1 { width: 400px; height: 400px; top: -100px; left: -100px; background: var(--glow-pink); opacity: 0.3; }
+    .orb-2 { width: 500px; height: 500px; bottom: -150px; right: -150px; background: var(--glow-purple); opacity: 0.25; animation-delay: -4s; }
+    .orb-3 { width: 300px; height: 300px; top: 50%; left: 50%; transform: translate(-50%,-50%); background: var(--glow-cyan); opacity: 0.15; animation-delay: -8s; }
+    @keyframes orbFloat { 0% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px,-20px) scale(1.1); } 100% { transform: translate(-20px,30px) scale(0.95); } }
+    .orb-3 { animation-name: orbFloat3; }
+    @keyframes orbFloat3 { 0% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-45%,-55%) scale(1.15); } 100% { transform: translate(-55%,-45%) scale(0.9); } }
+    .scanlines { position: fixed; inset: 0; z-index: 2; pointer-events: none; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px); }
+
+    .deck { position: relative; width: 100vw; height: 100vh; z-index: 10; transition: perspective 0.6s ease; }
+    html.fancy .deck { perspective: 1200px; }
+    .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 60px; opacity: 0; pointer-events: none; transition: var(--slide-transition); transform: translateX(40px); }
+    .slide.active { opacity: 1; pointer-events: auto; transform: translateX(0); }
+    .slide.prev  { opacity: 0; pointer-events: none; transform: translateX(-40px); }
+    html.fancy .slide       { transform: translateZ(-200px) rotateY(8deg); }
+    html.fancy .slide.active { transform: translateZ(0) rotateY(0); }
+    html.fancy .slide.prev  { transform: translateZ(-200px) rotateY(-8deg); }
+
+    h1 { font-family: var(--font-heading); font-size: 3.2em; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; text-align: center; }
+    html.fancy h1 { font-size: 3.6em; letter-spacing: 0.05em; }
+    h1 span { display: block; background: linear-gradient(135deg, #e91e8a, #8b5cf6, #06b6d4, #67e8f9); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    html.fancy h1 span { animation: gradientShift 6s ease-in-out infinite; }
+    @keyframes gradientShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+    h2 { font-family: var(--font-heading); font-size: 2.4em; font-weight: 700; color: #f8fafc; margin-bottom: 0.5em; text-align: center; }
+    html.fancy h2 { font-size: 2.2em; text-shadow: 0 0 30px var(--glow-cyan), 0 0 60px rgba(6,182,212,0.2); }
+    h3 { font-size: 1.3em; font-weight: 400; color: var(--accent2); margin-bottom: 1.2em; text-align: center; }
+    html.fancy h3 { font-size: 1.2em; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase; }
+    .subtitle { color: var(--text-muted); font-size: 1.1em; margin-top: 0.8em; text-align: center; }
+    html.fancy .subtitle { font-family: 'Orbitron', sans-serif; font-size: 1em; letter-spacing: 0.15em; }
+
+    ul { list-style: none; max-width: 1400px; width: 100%; }
+    ul li { padding: 0.55em 0; font-size: 1.05em; line-height: 1.6; border-bottom: 1px solid rgba(148,163,184,0.1); }
+    html.fancy ul li { border-bottom-color: rgba(6,182,212,0.1); }
+    ul li:last-child { border-bottom: none; }
+    ul li strong { color: var(--accent); }
+    html.fancy ul li strong { text-shadow: 0 0 12px var(--glow-pink); }
+
+    blockquote { border-left: 3px solid var(--accent); background: rgba(233,30,138,0.08); padding: 0.6em 1.2em; margin-top: 1.2em; max-width: 1400px; width: 100%; font-size: 0.95em; color: #cbd5e1; border-radius: 0 6px 6px 0; }
+    html.fancy blockquote { border-left-color: var(--accent2); background: rgba(6,182,212,0.06); backdrop-filter: blur(10px); box-shadow: 0 0 20px rgba(6,182,212,0.08); color: #93c5e8; border-radius: 0 8px 8px 0; }
+
+    table { border-collapse: collapse; max-width: 1400px; width: 100%; font-size: 1em; background: rgba(15,23,42,0.6); border-radius: 8px; overflow: hidden; }
+    html.fancy table { background: rgba(2,0,16,0.7); box-shadow: 0 0 20px rgba(6,182,212,0.08); backdrop-filter: blur(10px); }
+    th { background: rgba(233,30,138,0.15); color: var(--accent); font-weight: 700; padding: 0.75em 1.1em; text-align: left; border-bottom: 2px solid rgba(233,30,138,0.3); }
+    html.fancy th { background: rgba(6,182,212,0.1); color: var(--accent2); border-bottom-color: rgba(6,182,212,0.3); text-shadow: 0 0 10px var(--glow-cyan); }
+    td { padding: 0.65em 1.1em; border-bottom: 1px solid rgba(148,163,184,0.08); color: var(--text); }
+    html.fancy td { border-bottom-color: rgba(6,182,212,0.08); }
+    tr:last-child td { border-bottom: none; }
+    td strong { color: var(--accent); }
+    html.fancy td strong { text-shadow: 0 0 8px var(--glow-pink); }
+
+    a { color: var(--accent2); text-decoration: none; border-bottom: 1px solid rgba(6,182,212,0.3); }
+    a:hover { color: #67e8f9; border-bottom-color: #67e8f9; }
+    .source { font-size: 0.72em; color: var(--text-muted); margin-top: 0.6em; font-style: italic; }
+    .note { font-size: 0.8em; color: var(--text-muted); margin-top: 1em; max-width: 1400px; text-align: center; }
+
+    .slide-num { position: fixed; bottom: 20px; right: 32px; font-size: 0.75em; color: #475569; z-index: 100; font-variant-numeric: tabular-nums; }
+    html.fancy .slide-num { font-family: 'Orbitron', sans-serif; font-size: 0.7em; color: #2a4a6a; letter-spacing: 0.1em; }
+    .progress { position: fixed; top: 0; left: 0; height: 3px; z-index: 100; background: linear-gradient(90deg, #e91e8a, #8b5cf6, #06b6d4); transition: width 0.4s ease; }
+    html.fancy .progress { height: 2px; box-shadow: 0 0 12px var(--glow-cyan), 0 0 30px var(--glow-pink); }
+    .hint { position: fixed; bottom: 20px; left: 32px; font-size: 0.65em; color: #334155; z-index: 100; }
+    html.fancy .hint { font-family: 'Orbitron', sans-serif; font-size: 0.55em; color: #1a3a5a; letter-spacing: 0.1em; }
+
+    .theme-toggle { position: fixed; top: 16px; right: 24px; z-index: 200; background: rgba(100,116,139,0.15); border: 1px solid rgba(100,116,139,0.2); color: #64748b; font-family: 'Inter', sans-serif; font-size: 0.65em; padding: 6px 14px; border-radius: 20px; cursor: pointer; backdrop-filter: blur(8px); }
+    .theme-toggle:hover { background: rgba(100,116,139,0.25); color: #94a3b8; }
+    html.fancy .theme-toggle { font-family: 'Orbitron', sans-serif; border-color: rgba(6,182,212,0.2); color: #2a4a6a; }
+    html.fancy .theme-toggle:hover { color: #06b6d4; border-color: rgba(6,182,212,0.4); }
+
+    html.fancy .slide.active h1, html.fancy .slide.active h2 { animation: fadeInUp 0.6s ease both; }
+    html.fancy .slide.active h3 { animation: fadeInUp 0.6s 0.1s ease both; }
+    html.fancy .slide.active table { animation: fadeInUp 0.6s 0.15s ease both; }
+    html.fancy .slide.active ul { animation: fadeInUp 0.6s 0.25s ease both; }
+    html.fancy .slide.active blockquote { animation: fadeInUp 0.6s 0.35s ease both; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+<div class="grid-floor"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="scanlines"></div>
+
+<div class="progress" id="progress"></div>
+<div class="slide-num" id="slideNum"></div>
+<div class="hint" id="hint">← →  Pfeiltasten · T Theme · F Fullscreen</div>
+<button class="theme-toggle" id="themeToggle">HOLODECK</button>
+
+<div class="deck">
+
+  <!-- SLIDE 1: Title -->
+  <div class="slide">
+    <h1><span>Use Case: Ausschreibung</span></h1>
+    <h3>KI-gestütztes Ausschreibungsmanagement bei Bechtle</h3>
+    <p class="subtitle">PLANET AI · Workshop 21. April 2026</p>
+  </div>
+
+  <!-- SLIDE 2: Kontext -->
+  <div class="slide">
+    <h2>Kontext</h2>
+    <ul>
+      <li><strong>Bechtle AG</strong> — größter deutscher IT-Systemintegrator</li>
+      <li>Bearbeitet hohe Volumina an öffentlichen und privaten Ausschreibungen</li>
+      <li>Ausschreibungsdokumente sind komplex, heterogen und zeitkritisch</li>
+    </ul>
+  </div>
+
+  <!-- SLIDE 3: Lösung -->
+  <div class="slide">
+    <h2>Lösung</h2>
+    <h3>Luna unterstützt das Ausschreibungsmanagement</h3>
+    <table>
+      <tr><th>Funktion</th><th>Was Luna tut</th></tr>
+      <tr><td><strong>Datenextraktion</strong></td><td>Automatische Extraktion aus Ausschreibungsdokumenten (PDFs, DOCX, Portale)</td></tr>
+      <tr><td><strong>Dialogbasierte Analyse</strong></td><td>Fragen an die Ausschreibung stellen, Anforderungen verstehen, Eignungskriterien prüfen</td></tr>
+      <tr><td><strong>Historisches Wissen</strong></td><td>Zugriff auf vergangene Ausschreibungen, Angebote und Ergebnisse</td></tr>
+    </table>
+  </div>
+
+  <!-- SLIDE 4: Referenz -->
+  <div class="slide">
+    <h2>Referenz</h2>
+    <blockquote>
+      <em>„Bechtle setzt auf KI-gestütztes Ausschreibungsmanagement: automatische Datenextraktion, dialogbasierte Analyse und Zugriff auf historisches Wissen."</em>
+    </blockquote>
+    <p class="note">
+      Veröffentlichte Fallstudie:<br/>
+      <a href="https://planet-ai.com/de/referenzen/ausschreibungsmanagement-bechtle/" target="_blank">planet-ai.com/de/referenzen/ausschreibungsmanagement-bechtle/</a>
+    </p>
+    <p class="note"><em>Details werden im Workshop ergänzt.</em></p>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  const stars = [];
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  window.addEventListener('resize', resize); resize();
+  for (let i = 0; i < 600; i++) stars.push({ x: (Math.random()-0.5)*W*2, y: (Math.random()-0.5)*H*2, z: Math.random()*1500+200, color: ['#fff','#a5d8ff','#d0bfff','#fcc2d7','#99e9f2'][Math.floor(Math.random()*5)] });
+  function draw() {
+    ctx.fillStyle = 'rgba(2,0,16,0.25)'; ctx.fillRect(0,0,W,H);
+    const cx=W/2, cy=H/2;
+    for (const s of stars) { s.z-=0.8; if(s.z<=1){s.x=(Math.random()-0.5)*W*2;s.y=(Math.random()-0.5)*H*2;s.z=1500;} const sx=cx+s.x/s.z*400,sy=cy+s.y/s.z*400,r=Math.max(0.3,(1-s.z/1500)*2.2),a=Math.max(0.1,1-s.z/1500),px=cx+s.x/(s.z+2)*400,py=cy+s.y/(s.z+2)*400; ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(sx,sy);ctx.strokeStyle=s.color;ctx.globalAlpha=a*0.4;ctx.lineWidth=r*0.6;ctx.stroke();ctx.beginPath();ctx.arc(sx,sy,r,0,Math.PI*2);ctx.fillStyle=s.color;ctx.globalAlpha=a;ctx.fill(); }
+    ctx.globalAlpha=1; requestAnimationFrame(draw);
+  } draw();
+})();
+var isFancy=false;
+function toggleTheme(){isFancy=!isFancy;document.documentElement.classList.toggle('fancy',isFancy);document.getElementById('themeToggle').textContent=isFancy?'STANDARD':'HOLODECK';}
+document.getElementById('themeToggle').addEventListener('click',toggleTheme);
+window.addEventListener('load',function(){
+  var slides=document.querySelectorAll('.slide'),total=slides.length,current=0;
+  function show(n){slides.forEach(function(s,i){s.classList.remove('active','prev');if(i===n)s.classList.add('active');else if(i<n)s.classList.add('prev');});document.getElementById('slideNum').textContent=(n+1)+' / '+total;document.getElementById('progress').style.width=((n+1)/total*100)+'%';}
+  function next(){if(current<total-1){current++;show(current);}}
+  function prev(){if(current>0){current--;show(current);}}
+  document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();next();}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();prev();}if(e.key==='Home'){e.preventDefault();current=0;show(current);}if(e.key==='End'){e.preventDefault();current=total-1;show(current);}if(e.key==='t'||e.key==='T')toggleTheme();if(e.key==='f'||e.key==='F'){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}});
+  var touchX=0;document.addEventListener('touchstart',function(e){touchX=e.touches[0].clientX;});document.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-touchX;if(dx<-50)next();if(dx>50)prev();});
+  show(0);
+});
+</script>
+</body>
+</html>
