@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Use Case: Anerkennung ausländischer Hochschulabschlüsse</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700;900&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f172a;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent: #e91e8a;
+      --accent2: #06b6d4;
+      --accent3: #8b5cf6;
+      --glow-pink: rgba(233,30,138,0.4);
+      --glow-cyan: rgba(6,182,212,0.4);
+      --glow-purple: rgba(139,92,246,0.3);
+      --font-heading: 'Inter', system-ui, sans-serif;
+      --slide-transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    html.fancy {
+      --bg: #020010;
+      --text: #d0e0ff;
+      --text-muted: #5a7aaa;
+      --font-heading: 'Orbitron', sans-serif;
+      --slide-transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    html.bright { --bg: #f1f5f9 !important; --text: #1e293b !important; --text-muted: #64748b !important; --accent: #be185d !important; --accent2: #0891b2 !important; }
+    html.bright table { background: rgba(241,245,249,0.9); }
+    html.bright th { background: rgba(190,24,93,0.1); color: var(--accent); border-bottom-color: rgba(190,24,93,0.2); }
+    html.bright td { border-bottom-color: rgba(30,41,59,0.08); }
+    html.bright blockquote { border-left-color: var(--accent); background: rgba(190,24,93,0.05); color: #334155; }
+    html.bright h2 { color: #0f172a; text-shadow: none; }
+    html.bright h1 span { background: linear-gradient(135deg, #be185d, #7c3aed, #0891b2); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; }
+    html.bright h3 { color: #0891b2; text-shadow: none; }
+    html.bright .progress { background: linear-gradient(90deg, #be185d, #7c3aed, #0891b2); }
+    html.bright ul li { border-bottom-color: rgba(30,41,59,0.08); }
+    html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; transition: background 0.6s ease, color 0.6s ease; }
+
+    #starfield, .grid-floor, .orb, .scanlines { opacity: 0; pointer-events: none; transition: opacity 0.8s ease; }
+    html.fancy #starfield, html.fancy .grid-floor, html.fancy .orb, html.fancy .scanlines { opacity: 1; }
+    #starfield { position: fixed; inset: 0; z-index: 0; }
+    .grid-floor {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 45vh; z-index: 1;
+      background: linear-gradient(to top, rgba(6,182,212,0.2) 0%, rgba(6,182,212,0.03) 40%, transparent 100%),
+        repeating-linear-gradient(90deg, rgba(6,182,212,0.2) 0px, transparent 1px, transparent 80px),
+        repeating-linear-gradient(0deg, rgba(6,182,212,0.2) 0px, transparent 1px, transparent 80px);
+      transform: perspective(500px) rotateX(55deg); transform-origin: bottom center;
+      animation: gridScroll 8s linear infinite;
+    }
+    @keyframes gridScroll { 0% { background-position-y: 0; } 100% { background-position-y: 80px; } }
+    .orb { position: fixed; border-radius: 50%; filter: blur(80px); z-index: 1; pointer-events: none; animation: orbFloat 12s ease-in-out infinite alternate; }
+    .orb-1 { width: 400px; height: 400px; top: -100px; left: -100px; background: var(--glow-pink); opacity: 0.3; }
+    .orb-2 { width: 500px; height: 500px; bottom: -150px; right: -150px; background: var(--glow-purple); opacity: 0.25; animation-delay: -4s; }
+    .orb-3 { width: 300px; height: 300px; top: 50%; left: 50%; transform: translate(-50%,-50%); background: var(--glow-cyan); opacity: 0.15; animation-delay: -8s; }
+    @keyframes orbFloat { 0% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px,-20px) scale(1.1); } 100% { transform: translate(-20px,30px) scale(0.95); } }
+    .orb-3 { animation-name: orbFloat3; }
+    @keyframes orbFloat3 { 0% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-45%,-55%) scale(1.15); } 100% { transform: translate(-55%,-45%) scale(0.9); } }
+    .scanlines { position: fixed; inset: 0; z-index: 2; pointer-events: none; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px); }
+
+    .deck { position: relative; width: 100vw; height: 100vh; z-index: 10; transition: perspective 0.6s ease; }
+    html.fancy .deck { perspective: 1200px; }
+    .slide {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      padding: 40px 60px; opacity: 0; pointer-events: none;
+      transition: var(--slide-transition); transform: translateX(40px);
+    }
+    .slide.active { opacity: 1; pointer-events: auto; transform: translateX(0); }
+    .slide.prev  { opacity: 0; pointer-events: none; transform: translateX(-40px); }
+    html.fancy .slide       { transform: translateZ(-200px) rotateY(8deg); }
+    html.fancy .slide.active { transform: translateZ(0) rotateY(0); }
+    html.fancy .slide.prev  { transform: translateZ(-200px) rotateY(-8deg); }
+
+    h1 { font-family: var(--font-heading); font-size: 3.2em; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; text-align: center; transition: font-family 0.3s, font-size 0.3s, letter-spacing 0.3s; }
+    html.fancy h1 { font-size: 3.6em; letter-spacing: 0.05em; }
+    h1 span { display: block; background: linear-gradient(135deg, #e91e8a, #8b5cf6, #06b6d4, #67e8f9); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    html.fancy h1 span { animation: gradientShift 6s ease-in-out infinite; }
+    @keyframes gradientShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+    h2 { font-family: var(--font-heading); font-size: 2.4em; font-weight: 700; color: #f8fafc; margin-bottom: 0.5em; text-align: center; transition: font-family 0.3s, text-shadow 0.3s; }
+    html.fancy h2 { font-size: 2.2em; text-shadow: 0 0 30px var(--glow-cyan), 0 0 60px rgba(6,182,212,0.2); }
+    h3 { font-size: 1.3em; font-weight: 400; color: var(--accent2); margin-bottom: 1.2em; text-align: center; transition: letter-spacing 0.3s, text-transform 0.3s; }
+    html.fancy h3 { font-size: 1.2em; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase; }
+    .subtitle { color: var(--text-muted); font-size: 1.1em; margin-top: 0.8em; text-align: center; }
+    html.fancy .subtitle { font-family: 'Orbitron', sans-serif; font-size: 1em; letter-spacing: 0.15em; }
+
+    ul { list-style: none; max-width: 1400px; width: 100%; }
+    ul li { padding: 0.55em 0; font-size: 1.05em; line-height: 1.6; border-bottom: 1px solid rgba(148,163,184,0.1); }
+    html.fancy ul li { border-bottom-color: rgba(6,182,212,0.1); }
+    ul li:last-child { border-bottom: none; }
+    ul li strong { color: var(--accent); }
+    html.fancy ul li strong { text-shadow: 0 0 12px var(--glow-pink); }
+
+    blockquote {
+      border-left: 3px solid var(--accent); background: rgba(233,30,138,0.08);
+      padding: 0.6em 1.2em; margin-top: 1.2em; max-width: 1400px; width: 100%;
+      font-size: 0.95em; color: #cbd5e1; border-radius: 0 6px 6px 0;
+    }
+    html.fancy blockquote {
+      border-left-color: var(--accent2); background: rgba(6,182,212,0.06);
+      backdrop-filter: blur(10px); box-shadow: 0 0 20px rgba(6,182,212,0.08);
+      color: #93c5e8; border-radius: 0 8px 8px 0;
+    }
+
+    table {
+      border-collapse: collapse; max-width: 1400px; width: 100%; font-size: 1em;
+      background: rgba(15,23,42,0.6); border-radius: 8px; overflow: hidden;
+    }
+    html.fancy table { background: rgba(2,0,16,0.7); box-shadow: 0 0 20px rgba(6,182,212,0.08); backdrop-filter: blur(10px); }
+    th { background: rgba(233,30,138,0.15); color: var(--accent); font-weight: 700; padding: 0.75em 1.1em; text-align: left; border-bottom: 2px solid rgba(233,30,138,0.3); }
+    html.fancy th { background: rgba(6,182,212,0.1); color: var(--accent2); border-bottom-color: rgba(6,182,212,0.3); text-shadow: 0 0 10px var(--glow-cyan); }
+    td { padding: 0.65em 1.1em; border-bottom: 1px solid rgba(148,163,184,0.08); color: var(--text); }
+    html.fancy td { border-bottom-color: rgba(6,182,212,0.08); }
+    tr:last-child td { border-bottom: none; }
+    td strong { color: var(--accent); }
+    html.fancy td strong { text-shadow: 0 0 8px var(--glow-pink); }
+    td em { color: var(--accent2); font-style: italic; }
+    .highlight-row { background: rgba(233,30,138,0.08); }
+    html.fancy .highlight-row { background: rgba(6,182,212,0.06); }
+
+    .source { font-size: 0.65em; color: var(--text-muted); margin-top: 0.6em; font-style: italic; }
+    a { color: var(--accent2); text-decoration: none; border-bottom: 1px solid rgba(6,182,212,0.3); }
+    a:hover { color: #67e8f9; border-bottom-color: #67e8f9; }
+    .section-title { font-size: 2.4em; font-weight: 900; }
+    html.fancy .section-title { font-size: 2.6em; }
+    .note { font-size: 0.72em; color: var(--text-muted); margin-top: 0.8em; max-width: 820px; text-align: center; }
+
+    .progress { position: fixed; top: 0; left: 0; height: 3px; z-index: 100; background: linear-gradient(90deg, #e91e8a, #8b5cf6, #06b6d4); transition: width 0.4s ease; }
+    html.fancy .progress { height: 2px; box-shadow: 0 0 12px var(--glow-cyan), 0 0 30px var(--glow-pink); }
+
+    .compact h2 { font-size: 2em; }
+    .compact h3 { margin-bottom: 0.6em; }
+    .compact table { font-size: 0.92em; }
+    .compact ul li { font-size: 0.95em; padding: 0.35em 0; }
+    .compact blockquote { font-size: 0.9em; margin-top: 0.8em; }
+    html.fancy .compact h2 { font-size: 1.9em; }
+    html.fancy .compact table { font-size: 0.88em; }
+
+    .theme-toggle {
+      position: fixed; top: 16px; right: 24px; z-index: 200;
+      background: rgba(100,116,139,0.15); border: 1px solid rgba(100,116,139,0.2);
+      color: #64748b; font-family: 'Inter', sans-serif; font-size: 0.65em;
+      padding: 6px 14px; border-radius: 20px; cursor: pointer; backdrop-filter: blur(8px);
+    }
+    .theme-toggle:hover { background: rgba(100,116,139,0.25); color: #94a3b8; }
+    html.fancy .theme-toggle { font-family: 'Orbitron', sans-serif; border-color: rgba(6,182,212,0.2); color: #2a4a6a; }
+    html.fancy .theme-toggle:hover { color: #06b6d4; border-color: rgba(6,182,212,0.4); box-shadow: 0 0 15px rgba(6,182,212,0.15); }
+
+    html.fancy .slide.active h1, html.fancy .slide.active h2 { animation: fadeInUp 0.6s ease both; }
+    html.fancy .slide.active h3 { animation: fadeInUp 0.6s 0.1s ease both; }
+    html.fancy .slide.active table { animation: fadeInUp 0.6s 0.15s ease both; }
+    html.fancy .slide.active ul { animation: fadeInUp 0.6s 0.25s ease both; }
+    html.fancy .slide.active blockquote { animation: fadeInUp 0.6s 0.35s ease both; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
+    /* ── Bridge Deck Projection ── */
+    .bridge-deck { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 30vh; z-index: 4; pointer-events: none; transform: perspective(500px) rotateX(55deg); transform-origin: bottom center; }
+    html.fancy .bridge-deck { display: block; }
+    .deck-row { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 100%; height: 100%; padding: 0 5vw 10vh; gap: 1.5vh; }
+    .deck-row-2 { margin-top: 8px; }
+    .deck-line { width: 60%; margin: 0 auto; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(6,182,212,0.4) 30%, rgba(6,182,212,0.4) 70%, transparent 100%); box-shadow: 0 0 10px rgba(6,182,212,0.2); }
+    .deck-text { font-family: "Orbitron", sans-serif; letter-spacing: 0.2em; text-transform: uppercase; }
+    .deck-nav, .deck-slide { display: none; }
+    .deck-title { font-size: 2.4em; color: rgba(6,182,212,0.3); text-shadow: 0 0 20px rgba(6,182,212,0.15), 0 0 60px rgba(6,182,212,0.08); letter-spacing: 0.4em; animation: deckPulse 4s ease-in-out infinite; }
+    @keyframes deckPulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+    .deck-prev { font-size: 1.8em; color: rgba(148,163,184,0.2); text-shadow: none; letter-spacing: 0.2em; }
+    .deck-next { font-size: 2.4em; color: rgba(139,92,246,0.25); text-shadow: 0 0 12px rgba(139,92,246,0.12), 0 0 30px rgba(139,92,246,0.06); letter-spacing: 0.25em; }
+    .deck-row.deck-scroll .deck-prev, .deck-row.deck-scroll .deck-title, .deck-row.deck-scroll .deck-next { animation: deckScrollUp 0.6s ease-out; }
+    @keyframes deckScrollUp { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+    /* ── Bridge Panel ── */
+    .bridge-panel { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 52px; z-index: 100; font-family: "Inter", system-ui, sans-serif; }
+    html.fancy .bridge-panel { display: flex; align-items: center; justify-content: space-between; background: linear-gradient(to top, rgba(6,182,212,0.12) 0%, rgba(2,0,16,0.95) 100%); border-top: 1px solid rgba(6,182,212,0.3); backdrop-filter: blur(12px); box-shadow: 0 -2px 20px rgba(6,182,212,0.1), inset 0 1px 0 rgba(6,182,212,0.15); }
+    .bridge-left, .bridge-right { display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+    .bridge-center { display: flex; align-items: center; gap: 16px; }
+    .bridge-label { font-family: "Orbitron", sans-serif; font-size: 0.55em; color: rgba(6,182,212,0.4); letter-spacing: 0.2em; text-transform: uppercase; }
+    .bridge-controls { font-family: "Orbitron", sans-serif; font-size: 0.6em; color: #06b6d4; letter-spacing: 0.1em; padding: 6px 16px; background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.2); border-radius: 3px; }
+    .bridge-status { font-family: "Orbitron", sans-serif; font-size: 0.85em; color: #06b6d4; letter-spacing: 0.15em; padding: 6px 24px; background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.25); border-radius: 3px; box-shadow: 0 0 12px rgba(6,182,212,0.08), inset 0 0 8px rgba(6,182,212,0.05); font-variant-numeric: tabular-nums; }
+    .bridge-indicator { width: 6px; height: 6px; border-radius: 50%; animation: indicatorPulse 3s ease-in-out infinite; }
+    .bridge-ind-1 { background: #06b6d4; box-shadow: 0 0 6px #06b6d4; animation-delay: 0s; }
+    .bridge-ind-2 { background: #8b5cf6; box-shadow: 0 0 6px #8b5cf6; animation-delay: -1s; }
+    .bridge-ind-3 { background: #22c55e; box-shadow: 0 0 6px #22c55e; animation-delay: -0.5s; }
+    .bridge-ind-4 { background: #e91e8a; box-shadow: 0 0 6px #e91e8a; animation-delay: -2s; }
+    @keyframes indicatorPulse { 0%,100% { opacity: 0.4; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+    /* Standard mode: simple HUD */
+    html:not(.fancy) .bridge-panel { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 40px; }
+    html:not(.fancy) .bridge-indicator, html:not(.fancy) .bridge-label { display: none; }
+    html:not(.fancy) .bridge-controls { font-size: 0.65em; color: #334155; padding: 0; background: none; border: none; }
+    html:not(.fancy) .bridge-status { font-size: 0.75em; color: #475569; padding: 0; background: none; border: none; box-shadow: none; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+<div class="grid-floor"></div>
+<div class="bridge-deck">
+  <div class="deck-row">
+    <div class="deck-text deck-nav" id="deckNav">◀ ▶  NAV · T THEME · F FULL</div>
+    <div class="deck-text deck-prev" id="deckPrev"></div>
+    <div class="deck-text deck-title" id="deckTitle">PLANET AI</div>
+    <div class="deck-text deck-next" id="deckNext"></div>
+    <div class="deck-text deck-slide" id="deckSlide">01 / 11</div>
+  </div>
+  <div class="deck-row deck-row-2">
+    <div class="deck-line"></div>
+  </div>
+</div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="scanlines"></div>
+
+<div class="progress" id="progress"></div>
+<div class="bridge-panel">
+  <div class="bridge-left">
+    <div class="bridge-indicator bridge-ind-1"></div>
+    <div class="bridge-indicator bridge-ind-2"></div>
+    <div class="bridge-label">NAV</div>
+    <div class="bridge-controls" id="hint">← → · T THEME · L LIGHT · F FULL</div>
+  </div>
+  <div class="bridge-center">
+    <div class="bridge-status" id="slideNum"></div>
+  </div>
+  <div class="bridge-right">
+    <div class="bridge-label">SYS</div>
+    <div class="bridge-indicator bridge-ind-3"></div>
+    <div class="bridge-indicator bridge-ind-4"></div>
+  </div>
+</div>
+<button class="theme-toggle" id="themeToggle">HOLODECK</button>
+
+<div class="deck">
+
+  <!-- SLIDE 1: Title -->
+  <div class="slide">
+    <h1><span>Use Case: Anerkennung</span></h1>
+    <h3>Ausländische Hochschulabschlüsse — 33 Minuten statt 3 Monate</h3>
+    <p class="subtitle">PLANET AI · Workshop 21. April 2026</p>
+  </div>
+
+  <!-- SLIDE 3: Kontext -->
+  <div class="slide">
+    <h2>Kontext</h2>
+    <ul>
+      <li>Die <strong>Zentralstelle für ausländisches Bildungswesen (ZAB)</strong> bewertet ausländische Hochschulabschlüsse für den deutschen Arbeitsmarkt — <strong>bundesweit</strong>, angesiedelt bei der KMK</li>
+      <li>Alle Zahlen (118.000+ Anträge, 290+ Mitarbeitende) beziehen sich auf die gesamte Bundesrepublik</li>
+      <li>Betrifft Fachkräfteeinwanderung, Blaue Karte EU, beschleunigtes Fachkräfteverfahren</li>
+      <li>Politisch hochrelevant: Fachkräftemangel, Einwanderungsgesetz, Integration</li>
+    </ul>
+  </div>
+
+  <!-- SLIDE 4: Problem -->
+  <div class="slide compact">
+    <h2>Problem</h2>
+    <table>
+      <tr><th>Dimension</th><th>Situation</th></tr>
+      <tr><td><strong>Bearbeitungszeit</strong></td><td>Offiziell 3 Monate, real 4–6 Monate, Spitzen bis 9 Monate</td></tr>
+      <tr><td><strong>Skalierung</strong></td><td>2005: 15 Fachreferenten → 2025: 290+ Mitarbeitende (×20)</td></tr>
+      <tr><td><strong>Antragslast</strong></td><td>2024: 118.000+ Anträge (+55% ggü. Vorjahr), davon 38% Ukraine</td></tr>
+      <tr><td><strong>Fehlerquote</strong></td><td>Häufige Nachforderungen wegen unvollständiger Ersteinreichung</td></tr>
+      <tr><td><strong>Beratungsqualität</strong></td><td>Bearbeiterabhängig — systematische Lücken bei Verfahrenswahl, Fördermöglichkeiten, Fristen</td></tr>
+    </table>
+    <blockquote>Mehr Personal löst ein exponentielles Wachstumsproblem nicht.</blockquote>
+  </div>
+
+  <!-- SLIDE 5: Was Sachbearbeiter nicht tun -->
+  <div class="slide compact">
+    <h2>Systematische Lücken</h2>
+    <blockquote><em>„Luna tut gute Dinge, die Mitarbeiter unter Umständen nicht tun."</em><br/>— Mitarbeiter eines Wirtschaftsministeriums nach einer Luna-Demo</blockquote>
+    <table>
+      <tr><th>Thema</th><th>Was fehlt</th></tr>
+      <tr><td><strong>Verfahrenswahl</strong></td><td>Hinweis auf Schnellwege (Blaue Karte ~2 Wo., Fachkräfteverfahren ~2 Mo.) — stattdessen Standardantrag, 3 Monate länger</td></tr>
+      <tr><td><strong>Fördermöglichkeiten</strong></td><td>208 € ZAB-Gebühr oft erstattungsfähig (IQ-Netzwerk, BAMF, Arbeitsagentur) — kein proaktiver Hinweis</td></tr>
+      <tr><td><strong>Kontolöschung</strong></td><td>ZAB-Kontolöschung ist unwiderruflich (alle Dokumente, Verfahren, Bescheide verloren) — Luna warnt und verhindert unbeabsichtigte Löschungen</td></tr>
+      <tr><td><strong>Aufenthaltsfristen</strong></td><td>Ablaufende Aufenthaltstitel werden nicht geprüft</td></tr>
+      <tr><td><strong>Dokumentenprüfung</strong></td><td>Vorab-Check existiert, wird nicht vollständig genutzt — systematische Lücken</td></tr>
+    </table>
+  </div>
+
+  <!-- SLIDE 6: Zielbild -->
+  <div class="slide">
+    <h2>Zielbild</h2>
+    <table>
+      <tr><th>Aspekt</th><th>Ohne Luna</th><th>Mit Luna</th></tr>
+      <tr><td><strong>Fallvorbereitung</strong></td><td>Tage bis Wochen (manuell)</td><td>33–60 Minuten</td></tr>
+      <tr><td><strong>Verfahrenswahl</strong></td><td>Abhängig vom Bearbeiterwissen</td><td>Automatisch korrekt</td></tr>
+      <tr><td><strong>Hinweisqualität</strong></td><td>Bearbeiterabhängig, lückenhaft</td><td>Konsistent, vollständig, proaktiv</td></tr>
+      <tr><td><strong>Fehlerquote Ersteinreichung</strong></td><td>Hoch (häufige Nachforderungen)</td><td>Minimiert durch vollständige Vorabprüfung</td></tr>
+    </table>
+    <blockquote>Jeder Antrag, der beim ersten Mal vollständig und korrekt eingereicht wird, entlastet Behörde und Antragsteller messbar.</blockquote>
+  </div>
+
+  <!-- SLIDE 7: Lösung -->
+  <div class="slide compact">
+    <h2>Lösung: 33 Minuten</h2>
+    <h3>Realer Testdurchlauf — fiktiver Antragsteller, echte Rechtsgrundlagen</h3>
+    <table>
+      <tr><th>Schritt</th><th>Was passiert</th><th>Dauer</th></tr>
+      <tr><td><strong>1. anabin-Prüfung</strong></td><td>Hochschulstatus recherchiert (H+), Lissabon-Konvention geprüft, Verfahrensweg bestimmt</td><td>~7 Min.</td></tr>
+      <tr><td><strong>2. Dokumentenprüfung</strong></td><td>7 Dokumente gegen ZAB-Anforderungen geprüft, 3 Mängel identifiziert, Lösungswege mit Kosten/Zeiten</td><td>~9 Min.</td></tr>
+      <tr><td><strong>3. Antragstellung</strong></td><td>Vollständige Simulation des ZAB-Online-Antrags inkl. BundID, Upload, Gebührenzahlung</td><td>~3 Min.</td></tr>
+      <tr><td><strong>4. Bescheid</strong></td><td>Modulvergleich mit deutschem Referenz-Bachelor, Bescheid im Amtsstil</td><td>~11 Min.</td></tr>
+      <tr><td><strong>5. Musterbericht</strong></td><td>Gesamtfallbewertung, Kostenaufstellung, Empfehlungen, Gantt-Diagramm</td><td>~3 Min.</td></tr>
+      <tr class="highlight-row"><td><strong>Gesamt</strong></td><td>5 Schritte, 70+ Web-Recherchen, 1 vollständiger Musterbericht</td><td><strong>~33 Min.</strong></td></tr>
+    </table>
+  </div>
+
+  <!-- SLIDE 8: Demonstrierter Fall -->
+  <div class="slide">
+    <h2>Demonstrierter Fall</h2>
+    <h3>Davit Mgeladze · B.Sc. Computer Science · Tbilisi State University (Georgien) → Rostock</h3>
+    <table>
+      <tr><th>Feld</th><th>Wert</th></tr>
+      <tr><td><strong>Verfahren</strong></td><td>ZAB-Zeugnisbewertung im Blue-Card-Kontext</td></tr>
+      <tr><td><strong>Jobangebot</strong></td><td>Baltic Software Solutions GmbH, Rostock</td></tr>
+      <tr><td><strong>Dokumentenmappe</strong></td><td>7 Dokumente, davon 2× Apostille ausstehend, 1× Übersetzung ausstehend</td></tr>
+      <tr><td><strong>Luna-Ergebnis</strong></td><td>Vollständige Fallbearbeitung inkl. Bescheid und Musterbericht</td></tr>
+    </table>
+    <p class="note"><em>Antragsteller und Arbeitgeber fiktiv. Hochschulen, Behörden und Rechtsgrundlagen real.</em></p>
+    <p class="note"><a href="Verfahren/screencast_2026-04-18.mp4" target="_blank">Video: screencast_2026-04-18.mp4</a></p>
+  </div>
+
+  <!-- SLIDE 9: Nutzen -->
+  <div class="slide">
+    <h2>Nutzen</h2>
+    <table>
+      <tr><th>Dimension</th><th>Effekt</th></tr>
+      <tr><td><strong>Zeitersparnis</strong></td><td>33 Min. statt Tage/Wochen pro Fall</td></tr>
+      <tr><td><strong>Kapazität</strong></td><td>Bei 118.000 Anträgen/Jahr: erhebliche Entlastung der ZAB</td></tr>
+      <tr><td><strong>Qualität</strong></td><td>Konsistente Beratung unabhängig vom Sachbearbeiter</td></tr>
+      <tr><td><strong>Fehlerreduktion</strong></td><td>Vollständige Vorabprüfung reduziert Nachforderungen</td></tr>
+      <tr><td><strong>Beratungstiefe</strong></td><td>Proaktive Hinweise zu Verfahrenswahl, Förderung, Fristen</td></tr>
+    </table>
+  </div>
+
+  <!-- SLIDE 10: Differenzierung -->
+  <div class="slide compact">
+    <h2>Differenzierung</h2>
+    <table>
+      <tr><th>Aspekt</th><th>Konventionelle Lösung</th><th>Luna</th></tr>
+      <tr><td><strong>Ansatz</strong></td><td>OCR + Formularhilfe</td><td>Autonome Fallbearbeitung end-to-end</td></tr>
+      <tr><td><strong>Rechtsrecherche</strong></td><td>Statische Regelwerke</td><td>Live-Recherche (anabin, ZAB, Rechtsgrundlagen)</td></tr>
+      <tr><td><strong>Dokumentenprüfung</strong></td><td>Checkliste</td><td>Inhaltliche Prüfung gegen Anforderungen mit Mängelanalyse</td></tr>
+      <tr><td><strong>Beratung</strong></td><td>Standardtext</td><td>Fallspezifisch: Verfahrenswahl, Förderung, Fristen, Risiken</td></tr>
+      <tr><td><strong>Ergebnis</strong></td><td>Formular ausgefüllt</td><td>Vollständiger Musterbericht mit Bescheid</td></tr>
+    </table>
+  </div>
+
+  <!-- SLIDE 11: Umsetzung -->
+  <div class="slide">
+    <h2>Umsetzung</h2>
+    <table>
+      <tr><th>Phase</th><th>Inhalt</th><th>Zeitrahmen</th></tr>
+      <tr><td><strong>1. Proof of Concept</strong></td><td>Anerkennungsverfahren (ZAB), definierter Falltyp</td><td>Abgeschlossen (April 2026)</td></tr>
+      <tr><td><strong>2. Erweiterung</strong></td><td>Weitere Verfahrenstypen (Berufsanerkennung, Heilberufe), Anbindung an ZAB-Portal</td><td>3–6 Monate</td></tr>
+      <tr><td><strong>3. Pilotbetrieb</strong></td><td>Integration bei Fachkräfte-Servicezentrale oder IQ-Netzwerk, Echtfälle mit Human-in-the-loop</td><td>6–12 Monate</td></tr>
+    </table>
+    <blockquote>Luna ersetzt keine Behörde. Die ZAB erteilt weiterhin Bescheide, Apostillen kommen weiterhin per Post. Luna sorgt dafür, dass jeder Antrag beim ersten Mal richtig ist — und dass kein Hinweis vergessen wird.</blockquote>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  const NUM_STARS = 600;
+  const stars = [];
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  window.addEventListener('resize', resize);
+  resize();
+  for (let i = 0; i < NUM_STARS; i++) {
+    stars.push({ x: (Math.random() - 0.5) * W * 2, y: (Math.random() - 0.5) * H * 2, z: Math.random() * 1500 + 200, color: ['#fff','#a5d8ff','#d0bfff','#fcc2d7','#99e9f2'][Math.floor(Math.random()*5)] });
+  }
+  function draw() {
+    ctx.fillStyle = 'rgba(2, 0, 16, 0.25)';
+    ctx.fillRect(0, 0, W, H);
+    const cx = W / 2, cy = H / 2;
+    for (const s of stars) {
+      s.z -= 0.8;
+      if (s.z <= 1) { s.x = (Math.random()-0.5)*W*2; s.y = (Math.random()-0.5)*H*2; s.z = 1500; }
+      const sx = cx + s.x/s.z*400, sy = cy + s.y/s.z*400;
+      const r = Math.max(0.3, (1-s.z/1500)*2.2);
+      const a = Math.max(0.1, (1-s.z/1500));
+      const px = cx + s.x/(s.z+2)*400, py = cy + s.y/(s.z+2)*400;
+      ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(sx,sy);
+      ctx.strokeStyle = s.color; ctx.globalAlpha = a*0.4; ctx.lineWidth = r*0.6; ctx.stroke();
+      ctx.beginPath(); ctx.arc(sx,sy,r,0,Math.PI*2);
+      ctx.fillStyle = s.color; ctx.globalAlpha = a; ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+var isFancy = false;
+function toggleTheme() {
+  isFancy = !isFancy; if (isFancy) document.documentElement.classList.remove('bright');
+  document.documentElement.classList.toggle('fancy', isFancy);
+  document.getElementById('themeToggle').textContent = isFancy ? 'STANDARD' : 'HOLODECK';var hi=document.getElementById('hint');if(hi)hi.textContent=isFancy?'← → · T THEME · F FULL':'← → · T THEME · L LIGHT · F FULL';
+}
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+window.addEventListener('load', function() {
+  var slides = document.querySelectorAll('.slide');
+  var total = slides.length;
+  var current = 0;
+  function show(n) {
+    slides.forEach(function(s, i) {
+      s.classList.remove('active', 'prev');
+      if (i === n) s.classList.add('active');
+      else if (i < n) s.classList.add('prev');
+    });
+    document.getElementById('slideNum').textContent = (n+1) + ' / ' + total;
+    var ds=document.getElementById('deckSlide');if(ds)ds.textContent=String(n+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');var dt=document.getElementById('deckTitle');if(dt){var dp=document.getElementById('deckPrev');if(dp){var ph=(n>0)?(slides[n-1].querySelector('h2')||slides[n-1].querySelector('h1')):null;dp.textContent=ph?ph.textContent:'';}var dn=document.getElementById('deckNext');if(dn){var nh=(n<total-1)?(slides[n+1].querySelector('h2')||slides[n+1].querySelector('h1')):null;dn.textContent=nh?nh.textContent:'';}var h=slides[n].querySelector('h2')||slides[n].querySelector('h1');dt.textContent=h?h.textContent:'';var dr=document.querySelector('.deck-row');if(dr){dr.classList.remove('deck-scroll');void dr.offsetWidth;dr.classList.add('deck-scroll');}}document.getElementById('progress').style.width = ((n+1)/total*100) + '%';
+  }
+  function next() { if (current < total-1) { current++; show(current); } }
+  function prev() { if (current > 0) { current--; show(current); } }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prev(); }
+    if (e.key === 'Home') { e.preventDefault(); current = 0; show(current); }
+    if (e.key === 'End') { e.preventDefault(); current = total-1; show(current); }
+    if (e.key === 't' || e.key === 'T') { toggleTheme(); }
+    if ((e.key === 'l' || e.key === 'L') && !document.documentElement.classList.contains('fancy')) { document.documentElement.classList.toggle('bright'); }
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+  var touchX = 0;
+  document.addEventListener('touchstart', function(e) { touchX = e.touches[0].clientX; });
+  document.addEventListener('touchend', function(e) {
+    var dx = e.changedTouches[0].clientX - touchX;
+    if (dx < -50) next(); if (dx > 50) prev();
+  });
+  show(0);
+});
+</script>
+</body>
+</html>
