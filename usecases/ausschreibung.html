@@ -20,6 +20,16 @@
       --font-heading: 'Orbitron', sans-serif;
       --slide-transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
     }
+    html.bright { --bg: #f1f5f9 !important; --text: #1e293b !important; --text-muted: #64748b !important; --accent: #be185d !important; --accent2: #0891b2 !important; }
+    html.bright table { background: rgba(241,245,249,0.9); }
+    html.bright th { background: rgba(190,24,93,0.1); color: var(--accent); border-bottom-color: rgba(190,24,93,0.2); }
+    html.bright td { border-bottom-color: rgba(30,41,59,0.08); }
+    html.bright blockquote { border-left-color: var(--accent); background: rgba(190,24,93,0.05); color: #334155; }
+    html.bright h2 { color: #0f172a; text-shadow: none; }
+    html.bright h1 span { background: linear-gradient(135deg, #be185d, #7c3aed, #0891b2); background-size: 300% 300%; -webkit-background-clip: text; background-clip: text; }
+    html.bright h3 { color: #0891b2; text-shadow: none; }
+    html.bright .progress { background: linear-gradient(90deg, #be185d, #7c3aed, #0891b2); }
+    html.bright ul li { border-bottom-color: rgba(30,41,59,0.08); }
     html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; transition: background 0.6s ease, color 0.6s ease; }
 
     #starfield, .grid-floor, .orb, .scanlines { opacity: 0; pointer-events: none; transition: opacity 0.8s ease; }
@@ -138,7 +148,7 @@
 <div class="grid-floor"></div>
 <div class="bridge-deck">
   <div class="deck-row">
-    <div class="deck-text deck-nav" id="deckNav">◀ ▶  NAV · T THEME · F FULL</div>
+    <div class="deck-text deck-nav" id="deckNav">◀ ▶  NAV · T THEME · D BRIGHT · F FULL</div>
     <div class="deck-text deck-prev" id="deckPrev"></div>
     <div class="deck-text deck-title" id="deckTitle">PLANET AI</div>
     <div class="deck-text deck-next" id="deckNext"></div>
@@ -159,7 +169,7 @@
     <div class="bridge-indicator bridge-ind-1"></div>
     <div class="bridge-indicator bridge-ind-2"></div>
     <div class="bridge-label">NAV</div>
-    <div class="bridge-controls" id="hint">← → · T THEME · F FULL</div>
+    <div class="bridge-controls" id="hint">← → · T THEME · D BRIGHT · F FULL</div>
   </div>
   <div class="bridge-center">
     <div class="bridge-status" id="slideNum"></div>
@@ -280,14 +290,14 @@
   } draw();
 })();
 var isFancy=false;
-function toggleTheme(){isFancy=!isFancy;document.documentElement.classList.toggle('fancy',isFancy);document.getElementById('themeToggle').textContent=isFancy?'STANDARD':'HOLODECK';}
+function toggleTheme(){isFancy=!isFancy;if(isFancy)document.documentElement.classList.remove('bright');document.documentElement.classList.toggle('fancy',isFancy);document.getElementById('themeToggle').textContent=isFancy?'STANDARD':'HOLODECK';}
 document.getElementById('themeToggle').addEventListener('click',toggleTheme);
 window.addEventListener('load',function(){
   var slides=document.querySelectorAll('.slide'),total=slides.length,current=0;
   function show(n){slides.forEach(function(s,i){s.classList.remove('active','prev');if(i===n)s.classList.add('active');else if(i<n)s.classList.add('prev');});document.getElementById('slideNum').textContent=(n+1)+' / '+total;var ds=document.getElementById('deckSlide');if(ds)ds.textContent=String(n+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');var dt=document.getElementById('deckTitle');if(dt){var dp=document.getElementById('deckPrev');if(dp){var ph=(n>0)?(slides[n-1].querySelector('h2')||slides[n-1].querySelector('h1')):null;dp.textContent=ph?ph.textContent:'';}var dn=document.getElementById('deckNext');if(dn){var nh=(n<total-1)?(slides[n+1].querySelector('h2')||slides[n+1].querySelector('h1')):null;dn.textContent=nh?nh.textContent:'';}var h=slides[n].querySelector('h2')||slides[n].querySelector('h1');dt.textContent=h?h.textContent:'';var dr=document.querySelector('.deck-row');if(dr){dr.classList.remove('deck-scroll');void dr.offsetWidth;dr.classList.add('deck-scroll');}}document.getElementById('progress').style.width=((n+1)/total*100)+'%';}
   function next(){if(current<total-1){current++;show(current);}}
   function prev(){if(current>0){current--;show(current);}}
-  document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();next();}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();prev();}if(e.key==='Home'){e.preventDefault();current=0;show(current);}if(e.key==='End'){e.preventDefault();current=total-1;show(current);}if(e.key==='t'||e.key==='T')toggleTheme();if(e.key==='f'||e.key==='F'){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}});
+  document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key===' '||e.key==='ArrowDown'){e.preventDefault();next();}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();prev();}if(e.key==='Home'){e.preventDefault();current=0;show(current);}if(e.key==='End'){e.preventDefault();current=total-1;show(current);}if((e.key==='d'||e.key==='D')&&!document.documentElement.classList.contains('fancy')){document.documentElement.classList.toggle('bright');}if(e.key==='t'||e.key==='T')toggleTheme();if(e.key==='f'||e.key==='F'){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}});
   var touchX=0;document.addEventListener('touchstart',function(e){touchX=e.touches[0].clientX;});document.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-touchX;if(dx<-50)next();if(dx>50)prev();});
   show(0);
 });
