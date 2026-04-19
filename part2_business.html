@@ -39,9 +39,9 @@
     .grid-floor {
       position: fixed; bottom: 0; left: 0; right: 0; height: 45vh; z-index: 1;
       background:
-        linear-gradient(to top, rgba(6,182,212,0.06) 0%, transparent 100%),
-        repeating-linear-gradient(90deg, rgba(6,182,212,0.08) 0px, transparent 1px, transparent 80px),
-        repeating-linear-gradient(0deg, rgba(6,182,212,0.08) 0px, transparent 1px, transparent 80px);
+        linear-gradient(to top, rgba(6,182,212,0.2) 0%, rgba(6,182,212,0.03) 40%, transparent 100%),
+        repeating-linear-gradient(90deg, rgba(6,182,212,0.2) 0px, transparent 1px, transparent 80px),
+        repeating-linear-gradient(0deg, rgba(6,182,212,0.2) 0px, transparent 1px, transparent 80px);
       transform: perspective(500px) rotateX(55deg); transform-origin: bottom center;
       animation: gridScroll 8s linear infinite;
     }
@@ -168,14 +168,10 @@
     a { color: var(--accent2); text-decoration: none; border-bottom: 1px solid rgba(6,182,212,0.3); transition: color 0.3s, border-color 0.3s; }
     a:hover { color: #67e8f9; border-bottom-color: #67e8f9; }
 
-    .slide-num { position: fixed; bottom: 20px; right: 32px; font-size: 0.75em; color: #475569; z-index: 100; font-variant-numeric: tabular-nums; transition: font-family 0.3s; }
-    html.fancy .slide-num { font-family: 'Orbitron', sans-serif; font-size: 0.7em; color: #2a4a6a; letter-spacing: 0.1em; }
 
     .progress { position: fixed; top: 0; left: 0; height: 3px; z-index: 100; background: linear-gradient(90deg, #e91e8a, #8b5cf6, #06b6d4); transition: width 0.4s ease, box-shadow 0.3s; }
     html.fancy .progress { height: 2px; box-shadow: 0 0 12px var(--glow-cyan), 0 0 30px var(--glow-pink); }
 
-    .hint { position: fixed; bottom: 20px; left: 32px; font-size: 0.65em; color: #334155; z-index: 100; transition: font-family 0.3s; }
-    html.fancy .hint { font-family: 'Orbitron', sans-serif; font-size: 0.55em; color: #1a3a5a; letter-spacing: 0.1em; }
 
     .compact h2 { font-size: 2.8em; }
     .compact h3 { margin-bottom: 0.6em; }
@@ -202,20 +198,79 @@
     html.fancy .slide.active ul, html.fancy .slide.active ol { animation: fadeInUp 0.6s 0.25s ease both; }
     html.fancy .slide.active blockquote { animation: fadeInUp 0.6s 0.35s ease both; }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
+    /* ── Bridge Deck Projection ── */
+    .bridge-deck { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 30vh; z-index: 4; pointer-events: none; transform: perspective(500px) rotateX(55deg); transform-origin: bottom center; }
+    html.fancy .bridge-deck { display: block; }
+    .deck-row { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 100%; height: 100%; padding: 0 5vw 10vh; gap: 1.5vh; }
+    .deck-row-2 { margin-top: 8px; }
+    .deck-line { width: 60%; margin: 0 auto; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(6,182,212,0.4) 30%, rgba(6,182,212,0.4) 70%, transparent 100%); box-shadow: 0 0 10px rgba(6,182,212,0.2); }
+    .deck-text { font-family: "Orbitron", sans-serif; letter-spacing: 0.2em; text-transform: uppercase; }
+    .deck-nav, .deck-slide { display: none; }
+    .deck-title { font-size: 2.4em; color: rgba(6,182,212,0.3); text-shadow: 0 0 20px rgba(6,182,212,0.15), 0 0 60px rgba(6,182,212,0.08); letter-spacing: 0.4em; animation: deckPulse 4s ease-in-out infinite; }
+    @keyframes deckPulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+    .deck-prev { font-size: 1.8em; color: rgba(148,163,184,0.2); text-shadow: none; letter-spacing: 0.2em; }
+    .deck-next { font-size: 2.4em; color: rgba(139,92,246,0.25); text-shadow: 0 0 12px rgba(139,92,246,0.12), 0 0 30px rgba(139,92,246,0.06); letter-spacing: 0.25em; }
+    .deck-row.deck-scroll .deck-prev, .deck-row.deck-scroll .deck-title, .deck-row.deck-scroll .deck-next { animation: deckScrollUp 0.6s ease-out; }
+    @keyframes deckScrollUp { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+    /* ── Bridge Panel ── */
+    .bridge-panel { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 52px; z-index: 100; font-family: "Inter", system-ui, sans-serif; }
+    html.fancy .bridge-panel { display: flex; align-items: center; justify-content: space-between; background: linear-gradient(to top, rgba(6,182,212,0.12) 0%, rgba(2,0,16,0.95) 100%); border-top: 1px solid rgba(6,182,212,0.3); backdrop-filter: blur(12px); box-shadow: 0 -2px 20px rgba(6,182,212,0.1), inset 0 1px 0 rgba(6,182,212,0.15); }
+    .bridge-left, .bridge-right { display: flex; align-items: center; gap: 12px; padding: 0 24px; }
+    .bridge-center { display: flex; align-items: center; gap: 16px; }
+    .bridge-label { font-family: "Orbitron", sans-serif; font-size: 0.55em; color: rgba(6,182,212,0.4); letter-spacing: 0.2em; text-transform: uppercase; }
+    .bridge-controls { font-family: "Orbitron", sans-serif; font-size: 0.6em; color: #06b6d4; letter-spacing: 0.1em; padding: 6px 16px; background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.2); border-radius: 3px; }
+    .bridge-status { font-family: "Orbitron", sans-serif; font-size: 0.85em; color: #06b6d4; letter-spacing: 0.15em; padding: 6px 24px; background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.25); border-radius: 3px; box-shadow: 0 0 12px rgba(6,182,212,0.08), inset 0 0 8px rgba(6,182,212,0.05); font-variant-numeric: tabular-nums; }
+    .bridge-indicator { width: 6px; height: 6px; border-radius: 50%; animation: indicatorPulse 3s ease-in-out infinite; }
+    .bridge-ind-1 { background: #06b6d4; box-shadow: 0 0 6px #06b6d4; animation-delay: 0s; }
+    .bridge-ind-2 { background: #8b5cf6; box-shadow: 0 0 6px #8b5cf6; animation-delay: -1s; }
+    .bridge-ind-3 { background: #22c55e; box-shadow: 0 0 6px #22c55e; animation-delay: -0.5s; }
+    .bridge-ind-4 { background: #e91e8a; box-shadow: 0 0 6px #e91e8a; animation-delay: -2s; }
+    @keyframes indicatorPulse { 0%,100% { opacity: 0.4; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+    /* Standard mode: simple HUD */
+    html:not(.fancy) .bridge-panel { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 40px; }
+    html:not(.fancy) .bridge-indicator, html:not(.fancy) .bridge-label { display: none; }
+    html:not(.fancy) .bridge-controls { font-size: 0.65em; color: #334155; padding: 0; background: none; border: none; }
+    html:not(.fancy) .bridge-status { font-size: 0.75em; color: #475569; padding: 0; background: none; border: none; box-shadow: none; font-variant-numeric: tabular-nums; }
   </style>
 </head>
 <body>
 
 <canvas id="starfield"></canvas>
 <div class="grid-floor"></div>
+<div class="bridge-deck">
+  <div class="deck-row">
+    <div class="deck-text deck-nav" id="deckNav">◀ ▶  NAV · T THEME · F FULL</div>
+    <div class="deck-text deck-prev" id="deckPrev"></div>
+    <div class="deck-text deck-title" id="deckTitle">PLANET AI</div>
+    <div class="deck-text deck-next" id="deckNext"></div>
+    <div class="deck-text deck-slide" id="deckSlide">01 / 11</div>
+  </div>
+  <div class="deck-row deck-row-2">
+    <div class="deck-line"></div>
+  </div>
+</div>
 <div class="orb orb-1"></div>
 <div class="orb orb-2"></div>
 <div class="orb orb-3"></div>
 <div class="scanlines"></div>
 
 <div class="progress" id="progress"></div>
-<div class="slide-num" id="slideNum"></div>
-<div class="hint" id="hint">← →  Pfeiltasten · T Theme · F Fullscreen</div>
+<div class="bridge-panel">
+  <div class="bridge-left">
+    <div class="bridge-indicator bridge-ind-1"></div>
+    <div class="bridge-indicator bridge-ind-2"></div>
+    <div class="bridge-label">NAV</div>
+    <div class="bridge-controls" id="hint">← → · T THEME · F FULL</div>
+  </div>
+  <div class="bridge-center">
+    <div class="bridge-status" id="slideNum"></div>
+  </div>
+  <div class="bridge-right">
+    <div class="bridge-label">SYS</div>
+    <div class="bridge-indicator bridge-ind-3"></div>
+    <div class="bridge-indicator bridge-ind-4"></div>
+  </div>
+</div>
 <button class="theme-toggle" id="themeToggle">HOLODECK</button>
 
 <div class="deck">
@@ -251,7 +306,7 @@
 
   <!-- SLIDE 3: AI Knowledge Worker Stack -->
   <div class="slide">
-    <h2>Der AI Knowledge Worker</h2>
+    <h2>AI Knowledge Worker</h2>
     <table class="stack-table">
       <tr class="stack-header"><td colspan="3"><strong>= AI Knowledge Worker</strong></td></tr>
       <tr class="stack-vision"><td><strong>AI University</strong></td><td>Lernen + Anpassen + Individualisieren</td><td><strong>Vision</strong> — Alleinstellung von morgen</td></tr>
@@ -285,7 +340,7 @@
 
   <!-- SLIDE 5: Nicht Technologie sondern Wertschöpfung -->
   <div class="slide">
-    <h2>Nicht Technologie sondern Wertschöpfung</h2>
+    <h2>Wertschöpfung statt Technologie</h2>
     <table>
       <tr><th></th><th>A: Technologie verkaufen</th><th>B: Wertschöpfung verkaufen</th></tr>
       <tr><td><strong>Produkt</strong></td><td>Software-Zugang</td><td>Arbeitsergebnis</td></tr>
@@ -299,7 +354,7 @@
 
   <!-- SLIDE 6: Nicht Lizenzen sondern Ergebnisse -->
   <div class="slide compact">
-    <h2>Nicht Lizenzen sondern Ergebnisse</h2>
+    <h2>Ergebnisse statt Lizenzen</h2>
     <table>
       <tr><th>Mechanismus</th><th>Unser Beispiel</th><th>Wer macht das heute</th></tr>
       <tr><td><strong>Per Case</strong></td><td>Vertragsprüfung, Claims, Due Diligence</td><td>Kira (Legal AI) — pro Vertrag</td></tr>
@@ -313,7 +368,7 @@
 
   <!-- SLIDE 7: Der Output ist der Vertrieb -->
   <div class="slide compact">
-    <h2>Der Output ist der Vertrieb</h2>
+    <h2>Output als Vertrieb</h2>
     <table>
       <tr><th>Kanal</th><th>Mechanismus</th><th>Vorbild</th></tr>
       <tr><td><strong>Self-serve SaaS</strong></td><td>Upload → Ergebnis → Freemium → Conversion</td><td>ChatGPT, DeepL</td></tr>
@@ -360,7 +415,7 @@
 
   <!-- SLIDE 10: Infrastruktur existiert -->
   <div class="slide">
-    <h2>Infrastruktur existiert. Intelligenz fehlt.</h2>
+    <h2>Infrastruktur vs. Intelligenz</h2>
     <table>
       <tr><th>Existiert</th><th>Fehlt</th></tr>
       <tr><td>GPUs, Cloud, Rechenzentren</td><td>Intelligenz, die darauf läuft</td></tr>
@@ -415,7 +470,7 @@
 
   <!-- SLIDE 14: Human-in-the-loop -->
   <div class="slide">
-    <h2>Human-in-the-loop. Aber richtig.</h2>
+    <h2>Human-in-the-Loop</h2>
     <h3>Nicht Fallback. Sondern Lernmechanismus.</h3>
     <table>
       <tr><th></th><th>Klassisch</th><th>Unser Ansatz</th></tr>
@@ -443,7 +498,7 @@
 
   <!-- SLIDE 16: Personal Knowledge Worker -->
   <div class="slide compact">
-    <h2>Personal Knowledge Worker</h2>
+    <h2>Personal KW</h2>
     <h3>Nicht zuerst Unternehmen — sondern einzelne High-Value-Worker</h3>
     <table>
       <tr><th>Zielgruppe</th><th>Warum sie selbst zahlen</th></tr>
@@ -458,7 +513,7 @@
 
   <!-- SLIDE 17: Business Agent -->
   <div class="slide compact">
-    <h2>Out of the Box: Der Business Agent</h2>
+    <h2>Der Business Agent</h2>
     <h3>Der Agent assistiert nicht — er betreibt eigenständig ein dokumentenbasiertes Geschäft</h3>
     <blockquote>
       <strong>Analogie:</strong> Ein eBay-Händler kauft günstig, verkauft teuer → Gewinn.<br/>
@@ -574,7 +629,7 @@ window.addEventListener('load', function() {
       else if (i < n) s.classList.add('prev');
     });
     document.getElementById('slideNum').textContent = (n+1) + ' / ' + total;
-    document.getElementById('progress').style.width = ((n+1)/total*100) + '%';
+    var ds=document.getElementById('deckSlide');if(ds)ds.textContent=String(n+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');var dt=document.getElementById('deckTitle');if(dt){var dp=document.getElementById('deckPrev');if(dp){var ph=(n>0)?(slides[n-1].querySelector('h2')||slides[n-1].querySelector('h1')):null;dp.textContent=ph?ph.textContent:'';}var dn=document.getElementById('deckNext');if(dn){var nh=(n<total-1)?(slides[n+1].querySelector('h2')||slides[n+1].querySelector('h1')):null;dn.textContent=nh?nh.textContent:'';}var h=slides[n].querySelector('h2')||slides[n].querySelector('h1');dt.textContent=h?h.textContent:'';var dr=document.querySelector('.deck-row');if(dr){dr.classList.remove('deck-scroll');void dr.offsetWidth;dr.classList.add('deck-scroll');}}document.getElementById('progress').style.width = ((n+1)/total*100) + '%';
   }
 
   function next() { if (current < total-1) { current++; show(current); } }
