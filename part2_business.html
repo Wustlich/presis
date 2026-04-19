@@ -270,7 +270,7 @@
     <div class="bridge-indicator bridge-ind-1"></div>
     <div class="bridge-indicator bridge-ind-2"></div>
     <div class="bridge-label">NAV</div>
-    <div class="bridge-controls" id="hint">← → · T THEME · D BRIGHT · F FULL</div>
+    <div class="bridge-controls" id="hint">← → · T THEME · L LIGHT · F FULL</div>
   </div>
   <div class="bridge-center">
     <div class="bridge-status" id="slideNum"></div>
@@ -623,7 +623,7 @@ function toggleTheme() {
   isFancy = !isFancy;
   if (isFancy) document.documentElement.classList.remove('bright');
   document.documentElement.classList.toggle('fancy', isFancy);
-  document.getElementById('themeToggle').textContent = isFancy ? 'STANDARD' : 'HOLODECK';var hi=document.getElementById('hint');if(hi)hi.textContent=isFancy?'← → · T THEME · F FULL':'← → · T THEME · D BRIGHT · F FULL';
+  document.getElementById('themeToggle').textContent = isFancy ? 'STANDARD' : 'HOLODECK';var hi=document.getElementById('hint');if(hi)hi.textContent=isFancy?'← → · T THEME · F FULL':'← → · T THEME · L LIGHT · F FULL';
 }
 document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
@@ -652,7 +652,7 @@ window.addEventListener('load', function() {
     if (e.key === 'Home') { e.preventDefault(); current = 0; show(current); }
     if (e.key === 'End') { e.preventDefault(); current = total-1; show(current); }
     if (e.key === 't' || e.key === 'T') { toggleTheme(); }
-    if ((e.key === 'd' || e.key === 'D') && !document.documentElement.classList.contains('fancy')) { document.documentElement.classList.toggle('bright'); }
+    if ((e.key === 'l' || e.key === 'L') && !document.documentElement.classList.contains('fancy')) { document.documentElement.classList.toggle('bright'); }
     if (e.key === 'f' || e.key === 'F') {
       if (!document.fullscreenElement) document.documentElement.requestFullscreen();
       else document.exitFullscreen();
