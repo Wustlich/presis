@@ -1,0 +1,279 @@
+# Anerkennungsverfahren ausländischer Hochschulabschlüsse (Drittstaat)
+# Voraussetzung: Eine fertige Fallakte wird als Kontext/Input mitgegeben
+# Usage: uv run python examples/flow.py --mission missions/anerkennungsverfahren_drittstaat.yml
+#
+# Step fields: name (required), prompt (required), max_iterations (optional), timeout (optional)
+
+name: "Anerkennungsverfahren Hochschulabschluss – Drittstaat"
+description: "Bearbeitung eines Anerkennungsfalls für einen ausländischen Hochschulabschluss (Drittstaat) in Deutschland – von der anabin-Prüfung über die Dokumentenprüfung und Antragstellung bis zum Bescheid. Voraussetzung: Fallakte liegt als Input vor."
+
+steps:
+  - name: "anabin-Prüfung und rechtliche Einordnung"
+    max_iterations: 3
+    timeout: 300
+    prompt: |
+      ### Mission:
+      Führe die anabin-Prüfung durch und ordne den Fall rechtlich ein.
+
+      ### ANALYZE:
+      Lies die bereitgestellte Fallakte (Input). Prüfe:
+      1. **anabin-Datenbankrecherche**:
+         - Institutionenstatus der ausstellenden Hochschule (H+ / H+/- / H-)
+         - Abschlussstatus des konkreten Studiengangs (entspricht / gleichwertig / kein Äquivalent)
+      2. **Rechtliche Grundlagen** die auf diesen Fall zutreffen:
+         - Lissabon-Konvention (Prüfe, ob das Herkunftsland Vertragsstaat ist)
+         - BQFG (falls berufliche Anerkennung relevant)
+         - Fachkräfteeinwanderungsgesetz 2024 (falls anwendbar)
+         - Einschlägige Landesgesetze
+      3. **Verfahrensweg** bestimmen:
+         - Akademische Anerkennung (ZAB) vs. berufliche Anerkennung (Landesbehörde)?
+         - Ist ein Eilverfahren möglich?
+
+      ### ACTION:
+      Recherchiere die realen anabin-Einträge für die Hochschule aus der Fallakte.
+      Prüfe die aktuell gültigen rechtlichen Grundlagen für Drittstaatenangehörige.
+
+      ### REPORT:
+      ## anabin-Prüfungsergebnis
+      | Kriterium | Ergebnis | Bewertung |
+      |-----------|----------|-----------|
+
+      ## Rechtliche Einordnung
+      - Anwendbare Rechtsgrundlagen mit Kurzerläuterung
+      - Verfahrensweg: ZAB oder Landesbehörde?
+      - Besonderheiten durch Lissabon-Konvention (Beweislastumkehr)
+
+      ## Empfohlener Verfahrensweg
+      - Standard- oder Eilverfahren?
+      - Zuständige Behörde
+      - Geschätzte Bearbeitungszeit und Kosten
+
+      ### VISUALISIERUNG (Mermaid):
+      Erstelle ein Flussdiagramm des ermittelten Verfahrenswegs:
+      ```mermaid
+      graph TD
+          A["Antragstellende Person\nAusländische Hochschule"] --> B{"anabin-Status\nder Hochschule?"}
+          B -->|"H+"| C{"Abschluss\ngelistet?"}
+          B -->|"H+/-"| D["Einzelfallprüfung\ndurch ZAB"]
+          B -->|"H-"| E["Anerkennung\ni.d.R. nicht möglich"]
+          C -->|"entspricht"| F["Günstige Ausgangslage\nfür ZAB-Antrag"]
+          C -->|"kein Äquivalent"| D
+          F --> G{"Reglementierter\nBeruf?"}
+          D --> G
+          G -->|"Ja"| H["Landesbehörde\n+ BQFG"]
+          G -->|"Nein"| I["ZAB\nStatement of Comparability"]
+      ```
+
+  - name: "Dokumentenprüfung und Mängelfeststellung"
+    max_iterations: 2
+    timeout: 180
+    prompt: |
+      ### Mission:
+      Prüfe die Vollständigkeit der Unterlagen und identifiziere Mängel.
+
+      ### ANALYZE:
+      Lies die Fallakte und das anabin-Ergebnis aus dem Chat-Verlauf.
+      Prüfe jeden einzelnen Dokumentenbedarf gegen die vorliegende Dokumentenlage:
+
+      **Pflichddokumente ZAB-Verfahren:**
+      - Hochschulabschlusszeugnis / Urkunde (Original + beglaubigte Kopie)
+      - Transcript of Records (vollständige Notenübersicht)
+      - Diploma Supplement (falls vorhanden)
+      - Lichtbildausweis
+      - Apostille (Haager Konvention, auszustellen durch zuständige Behörde des Herkunftslandes)
+      - Vereidigte Übersetzung (Originalsprache → Deutsch)
+      - Ggf. Immatrikulationsbescheinigung
+
+      **Für Eilverfahren zusätzlich:**
+      - Schriftliche Arbeitsplatzzusage
+
+      ### ACTION:
+      Erstelle eine vollständige Dokumentenprüfliste für den vorliegenden Fall.
+      Identifiziere konkrete Lücken und schlage Lösungswege vor.
+
+      ### REPORT:
+      ## Dokumentenprüfung
+      | Dokument | Erforderlich | Vorhanden | Status | Handlungsbedarf |
+      |----------|-------------|-----------|--------|-----------------|
+
+      ## Festgestellte Mängel
+      (Für jeden Mangel: Beschreibung, Konsequenz, Lösungsweg, geschätzte Zeit/Kosten)
+
+      ## Handlungsempfehlung
+      - Priorisierte Maßnahmen zur Dokumentenbeschaffung
+      - Welche Schritte können parallel laufen?
+      - Gesamteinschätzung: Wie robust ist die Antragsbasis?
+
+      ### VISUALISIERUNG (Mermaid):
+      Erstelle ein Statusdiagramm der Dokumentenlage:
+      ```mermaid
+      graph LR
+          subgraph "Vollständig vorhanden"
+              D1["📄 Abschlusszeugnis"]
+              D2["📋 Transcript of Records"]
+              D3["🪪 Lichtbildausweis"]
+          end
+          subgraph "Fehlend / Mangelhaft"
+              D4["🔴 Apostille fehlt"]
+              D5["🟡 Keine Übersetzung"]
+          end
+          subgraph "Optional / Nicht vorhanden"
+              D6["⚪ Diploma Supplement"]
+          end
+      ```
+      Passe die Einteilung an die tatsächliche Dokumentenlage des vorliegenden Falls an.
+
+  - name: "Antragstellung simulieren"
+    max_iterations: 2
+    timeout: 180
+    prompt: |
+      ### Mission:
+      Simuliere die vollständige Antragstellung beim ZAB.
+
+      ### ANALYZE:
+      Lies alle vorherigen Ergebnisse aus dem Chat-Verlauf.
+      Prüfe: Sind alle Mängel aus Schritt 3 behoben? Falls nicht, dokumentiere Restrisiken.
+
+      Simuliere den ZAB-Online-Antrag (Stand: digitales Verfahren seit 15.02.2024):
+      - BundID-Registrierung der antragstellenden Person
+      - Ausfüllen des ZAB-Antragsformulars
+      - Hochladen der Dokumente (Formate, Dateigrößen, Anforderungen)
+      - Gebührenzahlung (208 € via ePayBL)
+      - Bestätigung und Aktenzeichen
+
+      ### ACTION:
+      Erstelle einen realistischen Antragsdatensatz (wie er im ZAB-System aussehen würde).
+      Beschreibe den Prozess aus Sicht der antragstellenden Person.
+
+      ### REPORT:
+      ## Antragsdatensatz
+      (Tabellarische Übersicht aller Antragsfelder mit den Werten aus der Fallakte)
+
+      ## Prozessnarration
+      (Kurze Beschreibung der Antragstellung aus Sicht der antragstellenden Person – Schritt für Schritt)
+
+      ## Status nach Antragstellung
+      - Aktenzeichen
+      - Eingangsdatum
+      - Verfahrensart (Standard / Eilverfahren)
+      - Erwartetes Bearbeitungsende
+      - Nächste Schritte für die antragstellende Person
+
+      ## Offene Risiken / Restmängel
+      (Falls Dokumente noch nicht vollständig waren: Was könnte zu Nachfragen führen?)
+
+  - name: "Behördliche Prüfung und Bescheid"
+    max_iterations: 2
+    timeout: 180
+    prompt: |
+      ### Mission:
+      Simuliere die Prüfung durch die ZAB und erstelle einen realistischen Bescheid.
+
+      ### ANALYZE:
+      Lies alle vorherigen Schritte aus dem Chat-Verlauf.
+      Wäge ab:
+      - Spricht die anabin-Einstufung für eine positive Entscheidung?
+      - Gibt es Wesentliche Unterschiede zum deutschen Referenzabschluss?
+      - Sind alle Dokumente korrekt und vollständig?
+      - Greift die Beweislastumkehr der Lissabon-Konvention zugunsten der antragstellenden Person?
+
+      Entscheide, welches Ergebnis der Bescheid hat:
+      a) Vollanerkennung (Abschluss entspricht deutschem Bachelor/Master)
+      b) Anerkennung mit Auflagen (z.B. Anpassungslehrgang oder Kenntnisprüfung)
+      c) Ablehnung (mit Begründung und Widerspruchsbelehrung)
+
+      ### ACTION:
+      Erstelle einen formal realistischen Bescheid der ZAB im Amtsstil auf Basis der Fallakte.
+
+      ### REPORT:
+      ## Internes Prüfprotokoll ZAB (simuliert)
+      - Prüfende Sachbearbeitung
+      - Geprüfte Dokumente
+      - Vergleichsmaßstab (deutscher Referenzabschluss)
+      - Festgestellte Gleichwertigkeiten und Unterschiede
+
+      ## Bescheid (Dokument im Amtsstil)
+      ---
+      **Zentralstelle für ausländisches Bildungswesen (ZAB)**
+      *Statement of Comparability / Zeugnisbewertung*
+
+      Aktenzeichen: [aus Verfahren]
+      Datum: [aktuell]
+
+      **Antragstellende Person:** [Name aus Fallakte]
+      **Geprüfter Abschluss:** [Abschluss aus Fallakte]
+
+      **Ergebnis:**
+      [Vollständiger Bescheidtext mit rechtlicher Begründung]
+
+      **Rechtsbehelfsbelehrung:**
+      [Widerspruchsmöglichkeit, Fristen, zuständiges Gericht]
+      ---
+
+      ## Bewertung des Bescheids
+      - Was bedeutet das Ergebnis konkret für die antragstellende Person?
+      - Welche nächsten Schritte ergeben sich?
+      - Ggf.: Empfehlung für Widerspruch oder Anpassungsmaßnahmen
+
+  - name: "Gesamtfallbewertung und Musterbericht"
+    max_iterations: 1
+    timeout: 120
+    prompt: |
+      ### Mission:
+      Erstelle eine vollständige Gesamtauswertung des Anerkennungsfalls als Musterbericht.
+
+      ### ANALYZE:
+      Lies den gesamten Chat-Verlauf aller vorherigen Schritte.
+      Ziehe Schlussfolgerungen:
+      - War der Verfahrensweg optimal gewählt?
+      - Welche Fehler oder Verzögerungen hätten vermieden werden können?
+      - Was kann die antragstellende Person aus dem Verfahren lernen?
+      - Welche systemischen Herausforderungen zeigt der Fall auf?
+
+      ### REPORT:
+      ## Musterbericht: Anerkennungsverfahren Hochschulabschluss Drittstaat → Deutschland
+
+      ### Executive Summary
+      (Max. 5 Sätze: Fall, Verfahren, Ergebnis)
+
+      ### Chronologischer Fallverlauf
+      | Phase | Zeitraum | Maßnahme | Ergebnis |
+      |-------|----------|----------|----------|
+
+      ### Kritische Erfolgsfaktoren
+      - Was hat das Verfahren erleichtert?
+      - Was hat es erschwert oder verzögert?
+
+      ### Typische Fallstricke (allgemein für Drittstaatenabschlüsse)
+      (Generalisierbare Erkenntnisse aus dem vorliegenden Fall)
+
+      ### Empfehlungen für künftige Antragsteller
+      - Checkliste der wichtigsten Vorbereitungsschritte
+      - Zeitplanung (realistische Meilensteine)
+      - Beratungsanlaufstellen
+
+      ### VISUALISIERUNG (Mermaid):
+      Erstelle ein Gantt-Diagramm des Gesamtverfahrens:
+      ```mermaid
+      gantt
+          title Anerkennungsverfahren – Zeitverlauf
+          dateFormat YYYY-MM-DD
+          section Vorbereitung
+          anabin-Recherche           :done, a1, 2025-01-05, 3d
+          Apostille beschaffen       :done, a2, 2025-01-08, 21d
+          Vereidigter Übersetzer     :done, a3, 2025-01-20, 14d
+          BundID erstellen           :done, a4, 2025-02-01, 1d
+          section Antragstellung
+          ZAB-Antrag online          :done, a5, 2025-02-03, 1d
+          Gebühr bezahlen            :done, a6, 2025-02-03, 1d
+          section Bearbeitung
+          ZAB-Prüfung (Standard)     :active, a7, 2025-02-04, 270d
+          section Bescheid
+          Statement of Comparability :a8, 2025-11-01, 7d
+      ```
+      Passe Daten an den vorliegenden Fall an. Hebe Wartezeiten und parallele Aktivitäten hervor.
+
+      ### Abschlussbewertung
+      - Gesamtdauer des Verfahrens
+      - Gesamtkosten (geschätzt)
+      - Empfehlung: Hätte ein alternativer Verfahrensweg Zeit/Kosten gespart?
