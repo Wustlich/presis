@@ -189,6 +189,9 @@
     html:not(.fancy) .bridge-panel { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 40px; }
     html:not(.fancy) .bridge-indicator, html:not(.fancy) .bridge-label { display: none; }
     html:not(.fancy) .bridge-controls { font-size: 0.65em; color: #334155; padding: 0; background: none; border: none; }
+    .hud-btn { cursor: pointer; pointer-events: auto; display: inline-block; padding: 4px 12px; min-width: 32px; text-align: center; -webkit-tap-highlight-color: rgba(6,182,212,0.3); border-radius: 4px; transition: all 0.2s; }
+    .hud-btn:hover { background: rgba(6,182,212,0.2); color: #06b6d4; }
+    html.fancy .hud-btn:hover { box-shadow: 0 0 8px rgba(6,182,212,0.3); }
     html:not(.fancy) .bridge-status { font-size: 0.75em; color: #475569; padding: 0; background: none; border: none; box-shadow: none; font-variant-numeric: tabular-nums; }
   </style>
 </head>
@@ -219,7 +222,7 @@
     <div class="bridge-indicator bridge-ind-1"></div>
     <div class="bridge-indicator bridge-ind-2"></div>
     <div class="bridge-label">NAV</div>
-    <div class="bridge-controls" id="hint">← → · T THEME · L LIGHT · F FULL</div>
+    <div class="bridge-controls" id="hint"><span class="hud-btn" onclick="prev()">←</span> <span class="hud-btn" onclick="next()">→</span> · <span class="hud-btn" onclick="toggleTheme()">T</span> THEME · <span class="hud-btn" onclick="document.documentElement.classList.toggle('bright')">L</span> LIGHT · <span class="hud-btn" onclick="toggleFull()">F</span> FULL</div>
   </div>
   <div class="bridge-center">
     <div class="bridge-status" id="slideNum"></div>
@@ -421,7 +424,8 @@ window.addEventListener('load', function() {
   }
   function next() { if (current < total-1) { current++; show(current); } }
   function prev() { if (current > 0) { current--; show(current); } }
-  document.addEventListener('keydown', function(e) {
+  window.next = next; window.prev = prev;
+  window.toggleFull = function() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); };  document.addEventListener('keydown', function(e) {
     if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); next(); }
     if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prev(); }
     if (e.key === 'Home') { e.preventDefault(); current = 0; show(current); }
